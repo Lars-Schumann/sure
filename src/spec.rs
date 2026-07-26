@@ -1,12 +1,17 @@
-use crate::const_helpers::not;
 use core::any::TypeId;
 use core::intrinsics::transmute_unchecked;
 use core::marker::Destruct;
 
+#[expect(unused)]
 const fn type_eq<T: 'static, U: 'static>() -> bool {
     TypeId::of::<T>() == TypeId::of::<U>()
 }
 
+const fn type_ne<T: 'static, U: 'static>() -> bool {
+    TypeId::of::<T>() != TypeId::of::<U>()
+}
+
+#[expect(unused)]
 fn try_transmute<Src: 'static, Dst: 'static>(src: Src) -> Result<Dst, Src> {
     match type_eq::<Src, Dst>() {
         true => Ok(
@@ -28,7 +33,7 @@ pub(crate) const fn try_fn_once<
     generic_input: GenericInput,
     f: F,
 ) -> Result<GenericOutput, GenericInput> {
-    if not(type_eq::<GenericInput, ConcreteInput>()) || not(type_eq::<GenericOutput, ConcreteOutput>()) {
+    if const { type_ne::<GenericInput, ConcreteInput>() || type_ne::<GenericOutput, ConcreteOutput>() } {
         return Err(generic_input);
     }
 
@@ -44,12 +49,26 @@ pub(crate) const fn try_fn_once<
 }
 
 #[expect(unused)]
-pub(crate) fn try_fn_mut<Gen: 'static, Con: 'static, F: FnMut(&mut Con)>(
-    g: Gen,
+#[rustfmt::skip]
+pub(crate) fn try_fn_mut<
+    GenericInput: 'static,
+    ConcreteInput: 'static,
+    F: FnMut(&mut ConcreteInput),
+>(
+    generic_input: GenericInput,
     mut f: F,
-) -> Result<Gen, Gen> {
-    let mut concrete: Con = try_transmute::<Gen, Con>(g)?;
-    f(&mut concrete);
+) -> Result<GenericInput, GenericInput> {
+    if const { type_ne::<GenericInput, ConcreteInput>() } {
+        return Err(generic_input);
+    }
 
-    Ok(try_transmute::<Con, Gen>(concrete).ok().unwrap())
+    // SAFETY: these types are equal
+    let mut concrete_input: ConcreteInput = unsafe { transmute_unchecked::<GenericInput, ConcreteInput>(generic_input) };
+    
+    f(&mut concrete_input);
+
+    // SAFETY: these types are equal
+    let generic_input: GenericInput = unsafe { transmute_unchecked::<ConcreteInput, GenericInput>(concrete_input) };
+    
+    Ok(generic_input)
 }
