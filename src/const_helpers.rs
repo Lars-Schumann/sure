@@ -3,7 +3,7 @@ use core::marker::Destruct;
 
 use crate::sure_eq::SureEq;
 
-const fn not(value: bool) -> bool {
+pub(crate) const fn not(value: bool) -> bool {
     match value {
         true => false,
         false => true,

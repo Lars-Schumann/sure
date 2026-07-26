@@ -12,6 +12,7 @@
 #![feature(const_ops)]
 #![feature(const_result_trait_fn)]
 #![feature(const_trait_impl)]
+#![feature(core_intrinsics)]
 #![feature(freeze)]
 #![feature(generic_const_args)]
 #![feature(generic_const_items)]
@@ -27,6 +28,7 @@
 //
 #![allow(clippy::match_bool)]
 #![allow(incomplete_features)]
+#![allow(internal_features)]
 #![allow(long_running_const_eval)]
 //
 #![no_std]

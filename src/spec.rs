@@ -1,50 +1,55 @@
+use crate::const_helpers::not;
 use core::any::TypeId;
+use core::intrinsics::transmute_unchecked;
+use core::marker::Destruct;
 
-const U8: TypeId = TypeId::of::<u8>();
-const U16: TypeId = TypeId::of::<u16>();
-const U32: TypeId = TypeId::of::<u32>();
-const U64: TypeId = TypeId::of::<u64>();
-const U128: TypeId = TypeId::of::<u128>();
-const USIZE: TypeId = TypeId::of::<usize>();
+const fn type_eq<T: 'static, U: 'static>() -> bool {
+    TypeId::of::<T>() == TypeId::of::<U>()
+}
 
-const I8: TypeId = TypeId::of::<i8>();
-const I16: TypeId = TypeId::of::<i16>();
-const I32: TypeId = TypeId::of::<i32>();
-const I64: TypeId = TypeId::of::<i64>();
-const I128: TypeId = TypeId::of::<i128>();
-const ISIZE: TypeId = TypeId::of::<isize>();
-
-#[expect(non_camel_case_types)]
-pub(crate) enum Type {
-    u8,
-    u16,
-    u32,
-    u64,
-    u128,
-    usize,
-    i8,
-    i16,
-    i32,
-    i64,
-    i128,
-    isize,
+fn try_transmute<Src: 'static, Dst: 'static>(src: Src) -> Result<Dst, Src> {
+    match type_eq::<Src, Dst>() {
+        true => Ok(
+            // SAFETY: the types are equal
+            unsafe { transmute_unchecked::<Src, Dst>(src) },
+        ),
+        false => Err(src),
+    }
 }
 
 #[rustfmt::skip]
-pub(crate) const fn type_of<T: 'static>() -> Option<Type> {
-    let type_id: TypeId = TypeId::of::<T>();
+pub(crate) const fn try_fn_once<
+    GenericInput: 'static,
+    GenericOutput: 'static,
+    ConcreteInput: 'static,
+    ConcreteOutput: 'static,
+    F: [const] FnOnce(ConcreteInput) -> ConcreteOutput + [const] Destruct,
+>(
+    generic_input: GenericInput,
+    f: F,
+) -> Result<GenericOutput, GenericInput> {
+    if not(type_eq::<GenericInput, ConcreteInput>()) || not(type_eq::<GenericOutput, ConcreteOutput>()) {
+        return Err(generic_input);
+    }
 
-         if type_id == U8    { Some(Type::u8   ) } 
-    else if type_id == U16   { Some(Type::u16  ) } 
-    else if type_id == U32   { Some(Type::u32  ) } 
-    else if type_id == U64   { Some(Type::u64  ) } 
-    else if type_id == U128  { Some(Type::u128 ) } 
-    else if type_id == USIZE { Some(Type::usize) } 
-    else if type_id == I8    { Some(Type::i8   ) } 
-    else if type_id == I16   { Some(Type::i16  ) } 
-    else if type_id == I32   { Some(Type::i32  ) } 
-    else if type_id == I64   { Some(Type::i64  ) } 
-    else if type_id == I128  { Some(Type::i128 ) } 
-    else if type_id == ISIZE { Some(Type::isize) } 
-    else                     { None              }
+    // SAFETY: these types are equal
+    let concrete_input: ConcreteInput = unsafe { transmute_unchecked::<GenericInput, ConcreteInput>(generic_input) };
+
+    let concrete_output: ConcreteOutput = f(concrete_input);
+
+    // SAFETY: these types are equal
+    let generic_output: GenericOutput = unsafe { transmute_unchecked::<ConcreteOutput, GenericOutput>(concrete_output) };
+
+    Ok(generic_output)
+}
+
+#[expect(unused)]
+pub(crate) fn try_fn_mut<Gen: 'static, Con: 'static, F: FnMut(&mut Con)>(
+    g: Gen,
+    mut f: F,
+) -> Result<Gen, Gen> {
+    let mut concrete: Con = try_transmute::<Gen, Con>(g)?;
+    f(&mut concrete);
+
+    Ok(try_transmute::<Con, Gen>(concrete).ok().unwrap())
 }
