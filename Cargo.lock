@@ -9,3 +9,6 @@ version = "0.3.0"
 [[package]]
 name = "sure_bench"
 version = "0.1.0"
+dependencies = [
+ "sure",
+]

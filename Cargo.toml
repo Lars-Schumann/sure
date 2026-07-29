@@ -11,16 +11,7 @@ readme = "README.md"
 description = "Refinement types"
 keywords = []
 
-[features]
-bench_compile_time = []
-
 [dependencies]
-
-
-[[bench]]
-name = "compile_time"
-path = "benches/compile_time.rs"
-harness = false
 
 [workspace]
 members = ["sure_bench"]
