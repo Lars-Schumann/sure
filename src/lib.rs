@@ -18,6 +18,7 @@
 #![feature(generic_const_items)]
 #![feature(generic_const_parameter_types)]
 #![feature(macro_metavar_expr_concat)]
+#![feature(macroless_generic_const_args)]
 #![feature(min_generic_const_args)]
 #![feature(unsized_const_params)]
 //
