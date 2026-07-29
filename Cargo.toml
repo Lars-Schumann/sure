@@ -2,6 +2,7 @@
 name = "sure"
 version = "0.3.0"
 edition = "2024"
+publish = true
 
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/lars-schumann/sure"
@@ -20,3 +21,6 @@ bench_compile_time = []
 name = "compile_time"
 path = "benches/compile_time.rs"
 harness = false
+
+[workspace]
+members = ["sure_bench"]
