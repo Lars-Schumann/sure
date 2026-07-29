@@ -16,8 +16,7 @@ static RANDOM: Aligned<[u8; 2_000_000]> = Aligned(*include_bytes!("../random.bin
 
 #[allow(unused)]
 const YOINK<T: 'static, const COUNT: usize>: &[T] = const {
-    let byte_count: usize = size_of::<T>() * COUNT;
-    unsafe { core::mem::transmute(&RANDOM.0[0..byte_count])}
+    unsafe { core::slice::from_raw_parts(RANDOM.0[..].as_ptr().cast::<T>(), COUNT) }
 };
 
 macro_rules! bench {
@@ -70,24 +69,23 @@ fn main() {
         [type: u16,     count: 40_000,  feature: "u16-40_000" ],
         [type: u16,     count: 45_000,  feature: "u16-45_000" ],
         [type: u16,     count: 50_000,  feature: "u16-50_000" ],
-
-     // [type: u16,     count: 55_000,  feature: "u16-55_000" ],
-     // [type: u16,     count: 60_000,  feature: "u16-60_000" ],
-     // [type: u16,     count: 65_000,  feature: "u16-65_000" ],
-     // [type: u16,     count: 70_000,  feature: "u16-70_000" ],
-     // [type: u16,     count: 75_000,  feature: "u16-75_000" ],
-     // [type: u16,     count: 80_000,  feature: "u16-80_000" ],
-     // [type: u16,     count: 85_000,  feature: "u16-85_000" ],
-     // [type: u16,     count: 90_000,  feature: "u16-90_000" ],
-     // [type: u16,     count: 95_000,  feature: "u16-95_000" ],
+        [type: u16,     count: 55_000,  feature: "u16-55_000" ],
+        [type: u16,     count: 60_000,  feature: "u16-60_000" ],
+        [type: u16,     count: 65_000,  feature: "u16-65_000" ],
+        [type: u16,     count: 70_000,  feature: "u16-70_000" ],
+        [type: u16,     count: 75_000,  feature: "u16-75_000" ],
+        [type: u16,     count: 80_000,  feature: "u16-80_000" ],
+        [type: u16,     count: 85_000,  feature: "u16-85_000" ],
+        [type: u16,     count: 90_000,  feature: "u16-90_000" ],
+        [type: u16,     count: 95_000,  feature: "u16-95_000" ],
 
         [type: u32,     count: 1_000,   feature: "u32-1_000"  ],
         [type: u32,     count: 2_000,   feature: "u32-2_000"  ],
-        [type: u32,     count: 5_000,   feature: "u32-5_000"  ],
-        [type: u32,     count: 10_000,  feature: "u32-10_000" ],
-        [type: u32,     count: 15_000,  feature: "u32-15_000" ],
-        [type: u32,     count: 20_000,  feature: "u32-20_000" ],
-        [type: u32,     count: 25_000,  feature: "u32-25_000" ],
+     // [type: u32,     count: 5_000,   feature: "u32-5_000"  ],
+     // [type: u32,     count: 10_000,  feature: "u32-10_000" ],
+     // [type: u32,     count: 15_000,  feature: "u32-15_000" ],
+     // [type: u32,     count: 20_000,  feature: "u32-20_000" ],
+     // [type: u32,     count: 25_000,  feature: "u32-25_000" ],
      // [type: u32,     count: 30_000,  feature: "u32-30_000" ],
      // [type: u32,     count: 35_000,  feature: "u32-35_000" ],
      // [type: u32,     count: 40_000,  feature: "u32-40_000" ],
