@@ -1,5 +1,3 @@
-#![feature(const_index)]
-#![feature(const_trait_impl)]
 #![feature(generic_const_args)]
 #![feature(generic_const_items)]
 #![feature(generic_const_parameter_types)]
@@ -16,7 +14,7 @@ static RANDOM: Aligned<[u8; 2_000_000]> = Aligned(*include_bytes!("../random.bin
 
 #[allow(unused)]
 const YOINK<T: 'static, const COUNT: usize>: &[T] = const {
-    unsafe { core::slice::from_raw_parts(RANDOM.0[..].as_ptr().cast::<T>(), COUNT) }
+    unsafe { core::slice::from_raw_parts(RANDOM.0.as_ptr().cast::<T>(), COUNT) }
 };
 
 macro_rules! bench {
