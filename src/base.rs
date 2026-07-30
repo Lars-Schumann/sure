@@ -1,7 +1,7 @@
 use core::marker::Destruct;
 use core::marker::Freeze;
 
-use crate::const_helpers;
+use crate::const_helpers as ch;
 use crate::set;
 use crate::sure_eq::SureEq;
 
@@ -78,7 +78,7 @@ where
     /// Checks if the given value is contained in `SET`.
     #[must_use]
     pub const fn set_contains(value: &T) -> bool {
-        const_helpers::slice_contains(SET, value)
+        ch::slice_contains(SET, value)
     }
 
     /// Checks if the given value is contained in `SET` using a binary search.
@@ -121,12 +121,11 @@ where
     /// It only changes `SET` to `SUPER_SET`, or fails to compile if `SET` isn't a subset of `SUPER_SET`.
     #[must_use]
     pub const fn widen<const SUPER_SET: &'static [T]>(self) -> Sure<T, SUPER_SET> {
-        const {
-            assert!(
-                const_helpers::slice_is_subset(SET, SUPER_SET),
-                "Tried to widen a Sure which failed because the target's SET isn't a superset of the original."
-            );
-        }
+        ch::const_assert!(
+            ch::slice_is_subset(SET, SUPER_SET),
+            "Tried to widen a Sure which failed because the target's SET isn't a superset of the original."
+        );
+
         // SAFETY: We just asserted that `SET` is a subset of `SUPER_SET`
         unsafe { self.cast_unchecked() }
     }

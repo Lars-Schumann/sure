@@ -4,8 +4,7 @@ use core::marker::ConstParamTy_;
 use core::marker::Destruct;
 use core::marker::Freeze;
 
-use crate::const_helpers;
-use crate::const_helpers::sort;
+use crate::const_helpers as ch;
 use crate::spec::try_fn_once;
 use crate::sure_eq::SureEq;
 
@@ -26,7 +25,7 @@ pub const SORT<
     const SET: &'static [T]
 >: &[T] = const {
     let arr: [T; LENGTH::<T, SET>] = SET.try_into().ok().expect("this is infallible");
-    &const_helpers::sort(arr)
+    &ch::sort(arr)
 };
 
 /// Returns the input slice but normalized(sorted + deduplicated).
@@ -89,11 +88,11 @@ const fn intersection<T: SureEq + Copy + [const] Destruct>(sets: &[&[T]]) -> Vec
     let [first_set, ..] = sets else {
         return vec![];
     };
-    let mut intersection: Vec<T> = const_helpers::slice_to_vec(first_set);
+    let mut intersection: Vec<T> = ch::slice_to_vec(first_set);
 
     let mut i: usize = 1; // starting at the 2nd element, since the first is already part of the intersection
     while i < sets.len() {
-        const_helpers::vec_reduce_to_intersection_with(&mut intersection, sets[i]);
+        ch::vec_reduce_to_intersection_with(&mut intersection, sets[i]);
         i += 1;
     }
 
@@ -118,7 +117,7 @@ const fn normalize<
     };
 
     let arr: [T; LEN] = slice.try_into().ok().expect("this is infallible");
-    let sorted = sort(arr);
+    let sorted = ch::sort(arr);
     deduped(&sorted)
 }
 

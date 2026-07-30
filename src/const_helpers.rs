@@ -149,3 +149,10 @@ pub(crate) const fn slice_to_vec<T: Copy>(slice: &[T]) -> Vec<T> {
 
     vec
 }
+
+macro_rules! const_assert {
+    ($($tt:tt)*) => {
+        const { assert!($($tt)*) }
+    };
+}
+pub(crate) use const_assert;
