@@ -73,7 +73,7 @@ cargo build --package sure
 cargo clean --package sure_bench
 
 for feat in "${features[@]}"; do
-    echo "bench feature: $feat"
-    cargo build --package sure_bench --features "$feat"
-    cargo clean --package sure_bench
+    echo -n "bench feature: $feat: "
+    cargo build --package sure_bench --features "$feat" 2>&1 | tr -s '[:space:]' '\n' | tail -n 1
+    cargo clean --package sure_bench > /dev/null 2>&1
 done
