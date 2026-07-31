@@ -12,3 +12,7 @@ version = "0.1.0"
 dependencies = [
  "sure",
 ]
+
+[[package]]
+name = "sure_run_bench"
+version = "0.1.0"

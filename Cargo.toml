@@ -14,4 +14,4 @@ keywords = []
 [dependencies]
 
 [workspace]
-members = ["sure_bench"]
+members = ["sure_bench", "sure_run_bench"]

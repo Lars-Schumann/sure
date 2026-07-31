@@ -1,0 +1,99 @@
+use std::process::Command;
+use std::process::Stdio;
+use std::time::Instant;
+
+static FEATURES: &[&str] = &[
+    "u8-1_000",
+    "u8-2_000",
+    "u8-5_000",
+    "u8-10_000",
+    "u8-15_000",
+    "u8-20_000",
+    "u8-25_000",
+    "u8-30_000",
+    "u8-35_000",
+    "u8-40_000",
+    "u8-45_000",
+    "u8-50_000",
+    "u8-55_000",
+    "u8-60_000",
+    "u8-65_000",
+    "u8-70_000",
+    "u8-75_000",
+    "u8-80_000",
+    "u8-85_000",
+    "u8-90_000",
+    "u8-95_000",
+    "u16-1_000",
+    "u16-2_000",
+    "u16-5_000",
+    "u16-10_000",
+    "u16-15_000",
+    "u16-20_000",
+    "u16-25_000",
+    "u16-30_000",
+    "u16-35_000",
+    "u16-40_000",
+    "u16-45_000",
+    "u16-50_000",
+    "u16-55_000",
+    "u16-60_000",
+    "u16-65_000",
+    "u16-70_000",
+    "u16-75_000",
+    "u16-80_000",
+    "u16-85_000",
+    "u16-90_000",
+    "u16-95_000",
+    "u32-1_000",
+    "u32-2_000",
+    "u32-5_000",
+    "u32-10_000",
+    "u32-15_000",
+    "u32-20_000",
+    "u32-25_000",
+    "u32-30_000",
+    "u32-35_000",
+    "u32-40_000",
+    "u32-45_000",
+    "u32-50_000",
+    "u32-55_000",
+    "u32-60_000",
+    "u32-65_000",
+    "u32-70_000",
+    "u32-75_000",
+    "u32-80_000",
+    "u32-85_000",
+    "u32-90_000",
+    "u32-95_000",
+];
+
+fn main() {
+    run_cargo(&["build", "--package", "sure"]);
+    run_cargo(&["clean", "--package", "sure_bench"]);
+
+    for feature in FEATURES {
+        print!("bench feat: {feature:12}: ");
+
+        let before = Instant::now();
+
+        run_cargo(&["build", "--package", "sure_bench", "--features", feature]);
+
+        println!("{:.3}s", before.elapsed().as_secs_f32());
+
+        run_cargo(&["clean", "--package", "sure_bench"]);
+    }
+}
+
+fn run_cargo(args: &[&str]) {
+    let status = Command::new("cargo")
+        .args(args)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .expect("failed to run cargo");
+
+    if !status.success() {
+        std::process::exit(status.code().unwrap_or(1));
+    }
+}
