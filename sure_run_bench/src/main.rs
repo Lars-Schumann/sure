@@ -1,3 +1,4 @@
+use std::collections::HashMap as Map;
 use std::process::Command;
 use std::process::Stdio;
 use std::time::Duration;
@@ -75,42 +76,40 @@ fn main() {
 
     println!("diff:");
 
-    for x in one.iter().zip(two) {
-        assert_eq!(x.0.0, x.1.0, "unexpected feature");
-
-        println!(
-            "feature: {}, change: {:.3}",
-            x.0.0,
-            (x.0.1.as_secs_f32() - x.1.1.as_secs_f32()) / x.0.1.as_secs_f32()
-        );
+    for feature in FEATURES {
+        let change_percent =
+            (one[feature].as_secs_f32() - two[feature].as_secs_f32()) / one[feature].as_secs_f32();
+        println!("feature: {feature}, change: {change_percent:.3}%",);
     }
 }
 
-fn multi_bench_round(count: usize) -> Vec<(&'static str, Duration)> {
-    let mut sums: Vec<(&'static str, Duration)> =
-        FEATURES.iter().map(|f| (*f, Duration::ZERO)).collect();
+fn multi_bench_round(count: usize) -> Map<&'static str, Duration> {
+    let mut multi_bench_round: Map<&'static str, Vec<Duration>> =
+        FEATURES.iter().map(|f| (*f, vec![])).collect();
 
     for round in 0..count {
         println!("Round: {}/{count}", round + 1);
-        let round = bench_round();
-        for (sum, (name, took)) in sums.iter_mut().zip(round) {
-            assert_eq!(sum.0, name, "unexpected feature");
-            sum.1 += took;
+
+        let bench_round = bench_round();
+
+        for (feature, took) in bench_round {
+            multi_bench_round
+                .entry(feature)
+                .and_modify(|e| e.push(took));
         }
     }
 
-    for (_, total) in sums.iter_mut() {
-        *total /= count as u32;
-    }
-
-    sums
+    multi_bench_round
+        .iter()
+        .map(|(feature, vec)| (*feature, average(vec)))
+        .collect()
 }
 
-fn bench_round() -> Vec<(&'static str, Duration)> {
+fn bench_round() -> Map<&'static str, Duration> {
     run_cargo(&["build", "--package", "sure"]);
     run_cargo(&["clean", "--package", "sure_bench"]);
 
-    let mut bench_round: Vec<(&'static str, Duration)> = vec![];
+    let mut bench_round: Map<&'static str, Duration> = Map::new();
 
     for feature in FEATURES {
         print!("{feature:12}: ");
@@ -118,7 +117,7 @@ fn bench_round() -> Vec<(&'static str, Duration)> {
         run_cargo(&["build", "--package", "sure_bench", "--features", feature]);
         let took = before.elapsed();
         println!("{:.3}s", took.as_secs_f32());
-        bench_round.push((feature, took));
+        bench_round.insert(feature, took);
         run_cargo(&["clean", "--package", "sure_bench"]);
     }
     bench_round
@@ -135,4 +134,9 @@ fn run_cargo(args: &[&str]) {
     if !status.success() {
         std::process::exit(status.code().unwrap_or(1));
     }
+}
+
+fn average(durations: &[Duration]) -> Duration {
+    let count: u32 = durations.len().try_into().expect("can't put len in u32");
+    durations.iter().sum::<Duration>() / count
 }
