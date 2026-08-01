@@ -1,3 +1,4 @@
+use colored::Colorize;
 use std::collections::HashMap as Map;
 use std::process::Command;
 use std::process::Stdio;
@@ -13,43 +14,43 @@ static FEATURES: &[&str] = &[
     "u8-20_000",
     "u8-25_000",
     "u8-30_000",
-    "u8-35_000",
-    "u8-40_000",
-    "u8-45_000",
-    "u8-50_000",
-    "u8-55_000",
-    "u8-60_000",
-    "u8-65_000",
-    "u8-70_000",
-    "u8-75_000",
-    "u8-80_000",
-    "u8-85_000",
-    "u8-90_000",
-    "u8-95_000",
-    "u16-1_000",
-    "u16-2_000",
-    "u16-5_000",
-    "u16-10_000",
-    "u16-15_000",
-    "u16-20_000",
-    "u16-25_000",
-    "u16-30_000",
-    "u16-35_000",
-    "u16-40_000",
-    "u16-45_000",
-    "u16-50_000",
-    "u16-55_000",
-    "u16-60_000",
-    "u16-65_000",
-    "u16-70_000",
-    "u16-75_000",
-    "u16-80_000",
-    "u16-85_000",
-    "u16-90_000",
-    "u16-95_000",
-    "u32-1_000",
-    "u32-2_000",
-    "u32-5_000",
+    // "u8-35_000",
+    // "u8-40_000",
+    // "u8-45_000",
+    // "u8-50_000",
+    // "u8-55_000",
+    // "u8-60_000",
+    // "u8-65_000",
+    // "u8-70_000",
+    // "u8-75_000",
+    // "u8-80_000",
+    // "u8-85_000",
+    // "u8-90_000",
+    // "u8-95_000",
+    // "u16-1_000",
+    // "u16-2_000",
+    // "u16-5_000",
+    // "u16-10_000",
+    // "u16-15_000",
+    // "u16-20_000",
+    // "u16-25_000",
+    // "u16-30_000",
+    // "u16-35_000",
+    // "u16-40_000",
+    // "u16-45_000",
+    // "u16-50_000",
+    // "u16-55_000",
+    // "u16-60_000",
+    // "u16-65_000",
+    // "u16-70_000",
+    // "u16-75_000",
+    // "u16-80_000",
+    // "u16-85_000",
+    // "u16-90_000",
+    // "u16-95_000",
+    // "u32-1_000",
+    // "u32-2_000",
+    // "u32-5_000",
     // "u32-10_000",
     // "u32-15_000",
     // "u32-20_000",
@@ -71,15 +72,25 @@ static FEATURES: &[&str] = &[
 ];
 
 fn main() {
-    let one = multi_bench_round(1);
-    let two = multi_bench_round(1);
+    let one = multi_bench_round(2);
+    let two = multi_bench_round(2);
 
     println!("diff:");
 
     for feature in FEATURES {
-        let change_percent =
-            (one[feature].as_secs_f32() - two[feature].as_secs_f32()) / one[feature].as_secs_f32();
-        println!("feature: {feature}, change: {change_percent:.3}%",);
+        let change_percent = (one[feature].as_secs_f32() - two[feature].as_secs_f32())
+            / one[feature].as_secs_f32()
+            * 100.0;
+
+        let change_percent_str = format!("{change_percent:.2}");
+
+        let change_pecercent_str = match change_percent {
+            ..-1.0 => change_percent_str.green(),
+            -1.0..=1.0 => change_percent_str.bright_black(),
+            1.0.. => change_percent_str.red(),
+            _ => change_percent_str.blink(),
+        };
+        println!("feature: {feature:12}, change: {change_pecercent_str:>6}%",);
     }
 }
 
