@@ -4,6 +4,7 @@ use core::marker::ConstParamTy_;
 use core::marker::Destruct;
 use core::marker::Freeze;
 
+use crate::bendn_sort;
 use crate::const_helpers as ch;
 use crate::spec::try_fn_once;
 use crate::sure_eq::SureEq;
@@ -33,7 +34,7 @@ pub const NORMALIZE<
     T: SureEq + const Ord + Copy + const Destruct + 'static,
     const SET: &'static [T],
 >: &[T] = const {
-    normalize::<T, {LENGTH::<T, SET>}>(SET).const_make_global()
+    normalize::<T, {LENGTH::<T, SET>}>(SET)
 };
 
 /// Returns the input slices concatenated with each other.
@@ -105,20 +106,25 @@ const fn normalize<
     const LEN: usize,
 >(
     slice: &'static [T],
-) -> Vec<T> {
+) -> &'static [T] {
     let slice: &[T] = match try_fn_once::<&[T], Vec<T>, &[u8], Vec<u8>, _>(slice, normalize_u8) {
-        Ok(normalized) => return normalized,
+        Ok(normalized) => return normalized.const_make_global(),
         Err(slice) => slice,
     };
 
     let slice: &[T] = match try_fn_once::<&[T], Vec<T>, &[u16], Vec<u16>, _>(slice, normalize_u16) {
-        Ok(normalized) => return normalized,
+        Ok(normalized) => return normalized.const_make_global(),
+        Err(slice) => slice,
+    };
+
+    let slice: &[T] = match try_fn_once::<&[T], &[T], &[u32], &[u32], _>(slice, normalize_u32) {
+        Ok(normalized) => return deduped(normalized).const_make_global(),
         Err(slice) => slice,
     };
 
     let arr: [T; LEN] = slice.try_into().ok().expect("this is infallible");
     let sorted = ch::sort(arr);
-    deduped(&sorted)
+    deduped(&sorted).const_make_global()
 }
 
 // FIXME: this would be way less ugly with const Range Iterators
@@ -178,4 +184,12 @@ const fn normalize_u16(slice: &[u16]) -> Vec<u16> {
     }
 
     normalized
+}
+
+#[expect(clippy::trivially_copy_pass_by_ref)]
+const fn normalize_u32(slice: &'static [u32]) -> &'static [u32] {
+    const fn u32_to_usize(v: &u32) -> usize {
+        usize::try_from(*v).ok().unwrap()
+    }
+    bendn_sort::radixsort(slice, u32_to_usize)
 }
