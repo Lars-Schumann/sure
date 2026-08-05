@@ -72,14 +72,17 @@ static FEATURES: &[&str] = &[
 ];
 
 fn main() {
-    let one = multi_bench_round(2);
-    let two = multi_bench_round(2);
+    run_git(&["stash", "push"]);
+    let before = multi_bench_round(2);
+
+    run_git(&["stash", "pop"]);
+    let after = multi_bench_round(2);
 
     println!("diff:");
 
     for feature in FEATURES {
-        let change_percent = (one[feature].as_secs_f32() - two[feature].as_secs_f32())
-            / one[feature].as_secs_f32()
+        let change_percent = (before[feature].as_secs_f32() - after[feature].as_secs_f32())
+            / before[feature].as_secs_f32()
             * 100.0;
 
         let change_percent_str = format!("{change_percent:.2}");
@@ -141,6 +144,19 @@ fn run_cargo(args: &[&str]) {
         .stderr(Stdio::null())
         .status()
         .expect("failed to run cargo");
+
+    if !status.success() {
+        std::process::exit(status.code().unwrap_or(1));
+    }
+}
+
+fn run_git(args: &[&str]) {
+    let status = Command::new("git")
+        .args(args)
+        //.stdout(Stdio::null())
+        //.stderr(Stdio::null())
+        .status()
+        .expect("failed to run git");
 
     if !status.success() {
         std::process::exit(status.code().unwrap_or(1));
