@@ -81,7 +81,7 @@ fn main() {
     println!("diff:");
 
     for feature in FEATURES {
-        let change_percent = (before[feature].as_secs_f32() - after[feature].as_secs_f32())
+        let change_percent = (after[feature].as_secs_f32() - before[feature].as_secs_f32())
             / before[feature].as_secs_f32()
             * 100.0;
 
