@@ -131,11 +131,11 @@ macro_rules! define_normalize_narrow_uint {
         const fn $name(slice: &[$ty]) -> Vec<$ty> {
             const ELEMENT_COUNT: usize = (<$ty>::MAX as usize) + 1;
 
-            let mut set: [bool; ELEMENT_COUNT] = [false; ELEMENT_COUNT];
+            let mut element_bitset: [bool; ELEMENT_COUNT] = [false; ELEMENT_COUNT];
 
             let mut i: usize = 0;
             while i < slice.len() {
-                set[slice[i] as usize] = true;
+                element_bitset[slice[i] as usize] = true;
                 i += 1;
             }
 
@@ -143,7 +143,7 @@ macro_rules! define_normalize_narrow_uint {
 
             let mut i: $ty = 0;
             loop {
-                if set[i as usize] {
+                if element_bitset[i as usize] {
                     normalized.push(i);
                 }
 
