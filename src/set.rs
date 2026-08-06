@@ -125,65 +125,41 @@ const fn normalize<
     deduped(&sorted).const_make_global()
 }
 
-// FIXME: this would be way less ugly with const Range Iterators
-const fn normalize_u8(slice: &[u8]) -> Vec<u8> {
-    const LEN: usize = u8::MAX as usize + 1;
-    let mut set: [bool; LEN] = [false; LEN];
+macro_rules! define_normalize_narrow_uint {
+    ($ty:ty, $name:ident) => {
+        #[allow(clippy::large_stack_arrays)]
+        const fn $name(slice: &[$ty]) -> Vec<$ty> {
+            const ELEMENT_COUNT: usize = (<$ty>::MAX as usize) + 1;
 
-    // for elem in slice: set[usize::from(elem)] = true
-    let mut i: usize = 0;
-    while i < slice.len() {
-        set[slice[i] as usize] = true;
-        i += 1;
-    }
+            let mut set: [bool; ELEMENT_COUNT] = [false; ELEMENT_COUNT];
 
-    let mut normalized: Vec<u8> = Vec::with_capacity(LEN);
+            let mut i: usize = 0;
+            while i < slice.len() {
+                set[slice[i] as usize] = true;
+                i += 1;
+            }
 
-    // for i in 0..=u8::MAX: if set[usize::from(i)]: normalized.push(i)
-    let mut i: u8 = 0;
-    loop {
-        if set[i as usize] {
-            normalized.push(i);
+            let mut normalized: Vec<$ty> = Vec::with_capacity(ELEMENT_COUNT);
+
+            let mut i: $ty = 0;
+            loop {
+                if set[i as usize] {
+                    normalized.push(i);
+                }
+
+                if i == <$ty>::MAX {
+                    break;
+                }
+                i += 1;
+            }
+
+            normalized
         }
-
-        if i == u8::MAX {
-            break;
-        }
-        i += 1;
-    }
-
-    normalized
+    };
 }
 
-#[expect(clippy::large_stack_arrays)]
-const fn normalize_u16(slice: &[u16]) -> Vec<u16> {
-    const LEN: usize = u16::MAX as usize + 1;
-    let mut set: [bool; LEN] = [false; LEN];
-
-    // for elem in slice: set[usize::from(elem)] = trues
-    let mut i: usize = 0;
-    while i < slice.len() {
-        set[slice[i] as usize] = true;
-        i += 1;
-    }
-
-    let mut normalized: Vec<u16> = Vec::with_capacity(LEN);
-
-    // for i in 0..=u16::MAX: if set[usize::from(i)]: normalized.push(i)
-    let mut i: u16 = 0;
-    loop {
-        if set[i as usize] {
-            normalized.push(i);
-        }
-
-        if i == u16::MAX {
-            break;
-        }
-        i += 1;
-    }
-
-    normalized
-}
+define_normalize_narrow_uint!(u8, normalize_u8);
+define_normalize_narrow_uint!(u16, normalize_u16);
 
 #[expect(clippy::trivially_copy_pass_by_ref)]
 const fn normalize_u32(slice: &'static [u32]) -> &'static [u32] {
