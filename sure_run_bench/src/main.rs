@@ -226,7 +226,10 @@ fn run_cargo(args: &[&str]) {
         .expect("failed to run cargo");
 
     if !status.success() {
-        std::process::exit(status.code().unwrap_or(1));
+        panic!(
+            "aborting, `cargo` failed with status code: {:?}",
+            status.code()
+        );
     }
 }
 
@@ -239,7 +242,10 @@ fn run_git(args: &[&str]) {
         .expect("failed to run git");
 
     if !status.success() {
-        std::process::exit(status.code().unwrap_or(1));
+        panic!(
+            "aborting, `git` failed with status code: {:?}",
+            status.code()
+        );
     }
 }
 
