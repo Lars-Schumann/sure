@@ -54,9 +54,7 @@ pub const INTERSECTION<
 const fn deduped<T: SureEq + Copy>(slice: &[T]) -> Vec<T> {
     let [first, ..] = slice else { return vec![] };
 
-    // FIXME: make this `vec![first]` once possible in const
-    let mut deduped: Vec<T> = vec![];
-    deduped.push(*first);
+    let mut deduped: Vec<T> = vec![*first];
 
     let mut i = 1; // starting at the 2nd element, since the first one is always unique
     while i < slice.len() {
