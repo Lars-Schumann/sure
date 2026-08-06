@@ -28,10 +28,9 @@ pub(crate) const fn try_fn_once<
     GenericOutput: 'static,
     ConcreteInput: 'static,
     ConcreteOutput: 'static,
-    F: [const] FnOnce(ConcreteInput) -> ConcreteOutput + [const] Destruct,
 >(
     generic_input: GenericInput,
-    f: F,
+    f: impl [const] FnOnce(ConcreteInput) -> ConcreteOutput + [const] Destruct,
 ) -> Result<GenericOutput, GenericInput> {
     if const { type_ne::<GenericInput, ConcreteInput>() || type_ne::<GenericOutput, ConcreteOutput>() } {
         return Err(generic_input);
@@ -53,10 +52,9 @@ pub(crate) const fn try_fn_once<
 pub(crate) fn try_fn_mut<
     GenericInput: 'static,
     ConcreteInput: 'static,
-    F: FnMut(&mut ConcreteInput),
 >(
     generic_input: GenericInput,
-    mut f: F,
+    mut f: impl FnMut(&mut ConcreteInput),
 ) -> Result<GenericInput, GenericInput> {
     if const { type_ne::<GenericInput, ConcreteInput>() } {
         return Err(generic_input);

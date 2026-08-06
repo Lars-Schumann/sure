@@ -105,17 +105,17 @@ const fn normalize<
 >(
     slice: &'static [T],
 ) -> &'static [T] {
-    let slice: &[T] = match try_fn_once::<&[T], Vec<T>, &[u8], Vec<u8>, _>(slice, normalize_u8) {
+    let slice: &[T] = match try_fn_once::<&[T], Vec<T>, &[u8], Vec<u8>>(slice, normalize_u8) {
         Ok(normalized) => return normalized.const_make_global(),
         Err(slice) => slice,
     };
 
-    let slice: &[T] = match try_fn_once::<&[T], Vec<T>, &[u16], Vec<u16>, _>(slice, normalize_u16) {
+    let slice: &[T] = match try_fn_once::<&[T], Vec<T>, &[u16], Vec<u16>>(slice, normalize_u16) {
         Ok(normalized) => return normalized.const_make_global(),
         Err(slice) => slice,
     };
 
-    let slice: &[T] = match try_fn_once::<&[T], &[T], &[u32], &[u32], _>(slice, normalize_u32) {
+    let slice: &[T] = match try_fn_once::<&[T], &[T], &[u32], &[u32]>(slice, normalize_u32) {
         Ok(normalized) => return deduped(normalized).const_make_global(),
         Err(slice) => slice,
     };
