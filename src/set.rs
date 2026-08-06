@@ -148,10 +148,10 @@ const fn normalize_u8(slice: &[u8]) -> Vec<u8> {
             normalized.push(i);
         }
 
-        i = i.wrapping_add(1);
-        if i == 0 {
+        if i == u8::MAX {
             break;
         }
+        i += 1;
     }
 
     normalized
@@ -177,10 +177,11 @@ const fn normalize_u16(slice: &[u16]) -> Vec<u16> {
         if set[i as usize] {
             normalized.push(i);
         }
-        i = i.wrapping_add(1);
-        if i == 0 {
+
+        if i == u16::MAX {
             break;
         }
+        i += 1;
     }
 
     normalized
