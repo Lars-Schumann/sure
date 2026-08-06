@@ -135,7 +135,7 @@ const fn normalize_u8(slice: &[u8]) -> Vec<u8> {
     // for elem in slice: set[usize::from(elem)] = true
     let mut i: usize = 0;
     while i < slice.len() {
-        set[usize::from(slice[i])] = true;
+        set[slice[i] as usize] = true;
         i += 1;
     }
 
@@ -165,7 +165,7 @@ const fn normalize_u16(slice: &[u16]) -> Vec<u16> {
     // for elem in slice: set[usize::from(elem)] = trues
     let mut i: usize = 0;
     while i < slice.len() {
-        set[usize::from(slice[i])] = true;
+        set[slice[i] as usize] = true;
         i += 1;
     }
 
