@@ -3,62 +3,89 @@
 use sure::*;
 
 #[test]
-fn one() {
-    let foo: SureU8![1, 2, 3] = SureU8::new(2).unwrap();
-    let bar: SureU8![10, 20] = SureU8::new(10).unwrap();
-    let baz: SureU8![11, 21, 12, 22, 13, 23] = foo + bar;
+fn basic() {
+    macro_rules! unsigned {
+        ($([$ty:ident, $module:ident]),+) => {$(
+            {
+                let a: $ty![1, 2, 3] = $ty::new(2 ).unwrap();
+                let b: $ty![10, 20]  = $ty::new(10).unwrap();
 
-    let _qux: SureU8![11, 12, 13, 21, 22, 23] = baz.sort();
-}
+                let c: $ty![11, 21, 12, 22, 13, 23] = a + b;
+                let d: $ty![11, 12, 13, 21, 22, 23] = c.sort();
+                let e: $ty![11, 12, 13, 21, 22, 23] = c.normalize();
 
-#[test]
-fn two() {
-    let foo: SureU8![1, 1, 1] = SureU8::new(1).unwrap();
-    let bar: SureU8![10, 20] = SureU8::new(10).unwrap();
-    let baz: SureU8![11, 21, 11, 21, 11, 21] = foo + bar;
+                assert_eq!(d.inner(), 12);
+                assert_eq!(e.inner(), 12);
+            }
+            {
+                let a: $ty![11, 11, 11] = $ty::new(11).unwrap();
+                let b: $ty![2, 3]       = $ty::new(3).unwrap();
 
-    let _qux: SureU8![11, 11, 11, 21, 21, 21] = baz.sort();
-    let _qox: SureU8![11, 21] = baz.normalize();
-}
+                let c: $ty![5, 3, 5, 3, 5, 3] = a / b;
+                let d: $ty![3, 3, 3, 5, 5, 5] = c.sort();
+                let e: $ty![3, 5            ] = c.normalize();
 
-#[test]
-fn three() {
-    let foo: SureU8![1, 1, 1, 2, 2] = SureU8::new(2).unwrap();
-    let bar: SureU8![1, 2, 3] = SureU8::new(2).unwrap();
-    let baz: SureU8![2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5] = (foo + bar).sort();
+                assert_eq!(d.inner(), 3);
+                assert_eq!(e.inner(), 3);
+            }
+            {
+                use $module::Range;
+                let a: $ty![Range![5..=7]]  = $ty::new(7).unwrap();
+                let b: $ty![Range![3..=4]]  = $ty::new(4).unwrap();
 
-    let _qox: SureU8![2, 3, 4, 5] = baz.normalize();
-}
+                let c: $ty![2, 1, 3, 2, 4, 3] = a - b;
+                let d: $ty![1, 2, 2, 3, 3, 4] = c.sort();
+                let e: $ty![1, 2, 3, 4      ] = c.normalize();
 
-#[test]
-fn four() {
-    let foo: SureU8![2, 4] = SureU8::new(2).unwrap();
-    let bar: SureU8![1, 2, 3] = SureU8::new(3).unwrap();
-    let baz: SureU8![2, 4, 4, 6, 8, 12] = (foo * bar).sort();
+                assert_eq!(d.inner(), 3);
+                assert_eq!(e.inner(), 3);
+            }
+        )+};
+    }
 
-    let _qox: SureU8![2, 4, 6, 8, 12] = baz.normalize();
-}
+    macro_rules! signed {
+        ($([$ty:ident, $module:ident]),+) => {$(
+            {
+                let a: $ty![-1, -2, 3] = $ty::new(-2).unwrap();
+                let b: $ty![-10, 20]   = $ty::new(20).unwrap();
 
-#[test]
-fn five() {
-    let a: SureI8![2, 4] = SureI8::new(4).unwrap();
-    let b: SureI8![1, 3] = SureI8::new(1).unwrap();
+                let c: $ty![-11, 19, -12, 18, -7, 23] = a + b;
+                let d: $ty![-12, -11, -7, 18, 19, 23] = c.sort();
+                let e: $ty![-12, -11, -7, 18, 19, 23] = c.normalize();
 
-    let _c: SureI8![3, 5, 7] = (a + b).normalize();
-}
+                assert_eq!(d.inner(), 18);
+                assert_eq!(e.inner(), 18);
+            }
+            {
+                let a: $ty![11, 11, 11] = $ty::new(11).unwrap();
+                let b: $ty![2, -3]      = $ty::new(-3).unwrap();
 
-#[test]
-fn huge() {
-    use sure_u16::*;
-    let r1: SureU16![Range![0..=4]] = SureU16::new(1).unwrap();
-    let r2: SureU16![Range![10..=12]] = SureU16::new(10).unwrap();
+                let c: $ty! [5, -3,  5, -3, 5, -3] = a / b;
+                let d: $ty![-3, -3, -3,  5, 5,  5] = c.sort();
+                let e: $ty![-3,  5            ] = c.normalize();
 
-    let _q: SureU16![0, 10, 11, 12, 20, 22, 24, 30, 33, 36, 40, 44, 48] = (r1 * r2).normalize();
-}
+                assert_eq!(d.inner(), -3);
+                assert_eq!(e.inner(), -3);
+            }
+            {
+                use $module::Range;
 
-#[test]
-fn bleh() {
-    let _r1: SureU8![4] = SureU8::new(4).unwrap();
+                assert_eq!(Range![ -3..2   ], &[-3, -2, -1, 0, 1   ]);
+                assert_eq!(Range![ -3..=2  ], &[-3, -2, -1, 0, 1, 2]);
+            }
+        )+};
+    }
+
+    #[rustfmt::skip]
+    unsigned!(
+        [SureU8, sure_u8], [SureU16, sure_u16], [SureU32, sure_u32], [SureU64, sure_u64], [SureU128, sure_u128], [SureUsize, sure_usize],
+        [SureI8, sure_i8], [SureI16, sure_i16], [SureI32, sure_i32], [SureI64, sure_i64], [SureI128, sure_i128], [SureIsize, sure_isize]
+    );
+
+    #[rustfmt::skip]
+    signed!(
+        [SureI8, sure_i8], [SureI16, sure_i16], [SureI32, sure_i32], [SureI64, sure_i64], [SureI128, sure_i128], [SureIsize, sure_isize]
+    );
 }
 
 #[test]
@@ -78,7 +105,7 @@ fn onion2() {
 }
 
 #[test]
-fn ranges() {
+fn all_ranges() {
     use sure_i8::Range;
 
     assert_eq!(Range![-3..2], &[-3, -2, -1, 0, 1]);
