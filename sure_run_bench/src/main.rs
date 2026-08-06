@@ -111,6 +111,27 @@ static _FEATURES: &[&str] = &[
     "u128-85_000",
     "u128-90_000",
     "u128-95_000",
+    "i32-cartesian-1_000",
+    "i32-cartesian-2_000",
+    "i32-cartesian-5_000",
+    "i32-cartesian-10_000",
+    "i32-cartesian-15_000",
+    "i32-cartesian-20_000",
+    "i32-cartesian-25_000",
+    "i32-cartesian-30_000",
+    "i32-cartesian-35_000",
+    "i32-cartesian-40_000",
+    "i32-cartesian-45_000",
+    "i32-cartesian-50_000",
+    "i32-cartesian-55_000",
+    "i32-cartesian-60_000",
+    "i32-cartesian-65_000",
+    "i32-cartesian-70_000",
+    "i32-cartesian-75_000",
+    "i32-cartesian-80_000",
+    "i32-cartesian-85_000",
+    "i32-cartesian-90_000",
+    "i32-cartesian-95_000",
 ];
 
 static FEATURES: &[&str] = &[
@@ -149,6 +170,13 @@ static FEATURES: &[&str] = &[
     // "u128-20_000",
     // "u128-50_000",
     // "u128-95_000",
+    "i32-cartesian-1_000",
+    "i32-cartesian-2_000",
+    "i32-cartesian-5_000",
+    "i32-cartesian-10_000",
+    "i32-cartesian-20_000",
+    "i32-cartesian-50_000",
+    "i32-cartesian-95_000",
 ];
 
 fn main() {
