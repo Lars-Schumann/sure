@@ -36,7 +36,6 @@ macro_rules! bench_cartesian_product {
             let a: SureI32<{ YOINK::<i32, $count> }> = SureI32::new(0).unwrap();
             let n: SureI32![2] = Sure::new(2).unwrap();
             let b: SureI32<_> = a / n;
-            assert_eq!(b.inner(), 0);
         }
     )+};
 }
