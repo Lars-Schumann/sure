@@ -264,8 +264,8 @@ fn run_cargo(args: &[&str]) {
 fn run_git(args: &[&str]) {
     let status = Command::new("git")
         .args(args)
-        //.stdout(Stdio::null())
-        //.stderr(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .status()
         .expect("failed to run git");
 
