@@ -1,6 +1,5 @@
 #![feature(generic_const_args)]
 #![feature(generic_const_items)]
-#![feature(generic_const_parameter_types)]
 #![feature(min_generic_const_args)]
 #![feature(macroless_generic_const_args)]
 #![allow(long_running_const_eval)]
