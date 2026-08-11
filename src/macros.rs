@@ -212,7 +212,7 @@ macro_rules! impl_ints {
         #[doc = concat!("A type alias for `Sure<",stringify!($num_t),", _>`.")]
         pub type $t_alias<const SET: &'static [$num_t]> = base::Sure<$num_t, SET>;
 
-        #[doc = concat!("A module TODO blegh.")]
+        #[doc = concat!("Helper consts for `",stringify!($t_alias),"`.")]
         pub mod $extra_mod {
 
             const RANGE_LENGTH_HELPER<const MIN: $num_t, const MAX: $num_t, const IS_INCLUSIVE: bool>: usize = const {
