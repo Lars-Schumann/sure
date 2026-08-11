@@ -1,5 +1,6 @@
 use alloc::vec::Vec;
-use core::{marker::Destruct, mem::MaybeUninit};
+use core::marker::Destruct;
+use core::mem::MaybeUninit;
 
 use crate::sure_eq::SureEq;
 

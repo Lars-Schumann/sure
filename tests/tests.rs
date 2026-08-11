@@ -90,7 +90,8 @@ fn basic() {
 
 #[test]
 fn onion() {
-    use sure_u32::{Range, Union};
+    use sure_u32::Range;
+    use sure_u32::Union;
 
     let _r1: SureU32![Union![Range![0..=2], Range![4..=5]]] =
         <SureU32![0, 1, 2, 4, 5]>::new(2).unwrap();
@@ -98,7 +99,8 @@ fn onion() {
 
 #[test]
 fn onion2() {
-    use sure_u32::{Range, Union};
+    use sure_u32::Range;
+    use sure_u32::Union;
 
     let _r1: SureU32![Union![Range![0..=2], Range![4..=5]]] =
         <SureU32![0, 1, 2, 4, 5]>::new(2).unwrap();
