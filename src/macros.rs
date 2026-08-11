@@ -76,7 +76,7 @@ macro_rules! impl_simple_unary_ops {
             use crate::base::Sure;
 
             const CODOMAIN<const SET: &'static[$inner_t]>: &[$inner_t] = const {
-                &core::array::from_fn::<$inner_t, { crate::set::LENGTH::<$inner_t, SET> }, _>(
+                &crate::const_helpers::array_from_fn::<$inner_t, { crate::set::LENGTH::<$inner_t, SET> }>(
                     const |i| {
                         let a: $inner_t = SET[i];
                         $op a
@@ -109,7 +109,7 @@ macro_rules! impl_simple_binary_ops {
             use crate::base::Sure;
 
             const CODOMAIN<const A: &'static[$inner_t], const B: &'static[$inner_t]>: &[$inner_t] = const {
-                &core::array::from_fn::<$inner_t, { crate::set::CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }, _>(
+                &crate::const_helpers::array_from_fn::<$inner_t, { crate::set::CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(
                     const |i| {
                         let b_len: usize = B.len();
                         let a_index: usize = i.strict_div(b_len);
@@ -145,7 +145,7 @@ macro_rules! impl_unary_fns {
             use crate::base::Sure;
 
             const CODOMAIN<const SET: &'static[$input_t]>: &[$codomain_t] = const {
-                &core::array::from_fn::<$codomain_t, { crate::set::LENGTH::<$input_t, SET> }, _>(
+                &crate::const_helpers::array_from_fn::<$codomain_t, { crate::set::LENGTH::<$input_t, SET> }>(
                     const |i| {
                         let a: $input_t = SET[i];
                         $fn_path(a)
@@ -177,7 +177,7 @@ macro_rules! impl_std_binary_fns {
             use crate::base::Sure;
 
             const CODOMAIN<const LHS: &'static[$lhs_t], const RHS: &'static[$rhs_t]>: &[$codomain_t] = const {
-                &core::array::from_fn::<$codomain_t, { crate::set::CARTESIAN_LENGTH::<$lhs_t, $rhs_t, LHS, RHS> }, _>(
+                &crate::const_helpers::array_from_fn::<$codomain_t, { crate::set::CARTESIAN_LENGTH::<$lhs_t, $rhs_t, LHS, RHS> }>(
                     const |i| {
                         let rhs_len: usize = RHS.len();
                         let lhs_index: usize = i.strict_div(rhs_len);

@@ -20,6 +20,7 @@
 #![feature(generic_const_parameter_types)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(macroless_generic_const_args)]
+#![feature(maybe_uninit_array_assume_init)]
 #![feature(min_generic_const_args)]
 #![feature(unsized_const_params)]
 //
