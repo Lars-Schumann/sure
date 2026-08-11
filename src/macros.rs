@@ -112,8 +112,8 @@ macro_rules! impl_simple_binary_ops {
                 &crate::const_helpers::array_from_fn::<$inner_t, { crate::set::CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(
                     const |i| {
                         let b_len: usize = B.len();
-                        let a_index: usize = i.strict_div(b_len);
-                        let b_index: usize = i.strict_rem(b_len);
+                        let a_index: usize = i / b_len;
+                        let b_index: usize = i % b_len;
                         let a: $inner_t = A[a_index];
                         let b: $inner_t = B[b_index];
                         a $op b
@@ -180,8 +180,8 @@ macro_rules! impl_std_binary_fns {
                 &crate::const_helpers::array_from_fn::<$codomain_t, { crate::set::CARTESIAN_LENGTH::<$lhs_t, $rhs_t, LHS, RHS> }>(
                     const |i| {
                         let rhs_len: usize = RHS.len();
-                        let lhs_index: usize = i.strict_div(rhs_len);
-                        let rhs_index: usize = i.strict_rem(rhs_len);
+                        let lhs_index: usize = i / rhs_len;
+                        let rhs_index: usize = i % rhs_len;
                         let lhs: $lhs_t = LHS[lhs_index];
                         let rhs: $rhs_t = RHS[rhs_index];
                         $fn_path(lhs, rhs)
