@@ -1,3 +1,0 @@
-[build]
-rustflags = ["-Znext-solver=globally"]
-rustdocflags = ["-Znext-solver=globally"]
