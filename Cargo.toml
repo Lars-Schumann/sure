@@ -7,11 +7,11 @@ publish = true
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/lars-schumann/sure"
 # homepage = ""
-readme = "README.md"
+# readme = "README.md"
 description = "Refinement types"
 keywords = []
 
 [dependencies]
 
 [workspace]
-members = ["sure_bench", "sure_run_bench"]
+members = ["sure-bench", "sure-run-bench"]

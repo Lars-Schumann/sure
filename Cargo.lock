@@ -16,14 +16,14 @@ name = "sure"
 version = "0.3.0"
 
 [[package]]
-name = "sure_bench"
+name = "sure-bench"
 version = "0.1.0"
 dependencies = [
  "sure",
 ]
 
 [[package]]
-name = "sure_run_bench"
+name = "sure-run-bench"
 version = "0.1.0"
 dependencies = [
  "colored",
