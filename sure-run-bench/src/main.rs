@@ -229,18 +229,18 @@ fn multi_bench_round(count: usize) -> Map<&'static str, Duration> {
 
 fn bench_round() -> Map<&'static str, Duration> {
     run_cargo(&["build", "--package", "sure"]);
-    run_cargo(&["clean", "--package", "sure_bench"]);
+    run_cargo(&["clean", "--package", "sure-bench"]);
 
     let mut bench_round: Map<&'static str, Duration> = Map::new();
 
     for feature in FEATURES {
         print!("{feature:12}: ");
         let before = Instant::now();
-        run_cargo(&["build", "--package", "sure_bench", "--features", feature]);
+        run_cargo(&["build", "--package", "sure-bench", "--features", feature]);
         let took = before.elapsed();
         println!("{:.3}s", took.as_secs_f32());
         bench_round.insert(feature, took);
-        run_cargo(&["clean", "--package", "sure_bench"]);
+        run_cargo(&["clean", "--package", "sure-bench"]);
     }
     bench_round
 }
