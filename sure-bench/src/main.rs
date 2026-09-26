@@ -1,7 +1,7 @@
-#![feature(generic_const_args)]
+#![feature(gca_const_items)]
+#![feature(gca_macroless_args)]
+#![feature(gca_min_const_items)]
 #![feature(generic_const_items)]
-#![feature(min_generic_const_args)]
-#![feature(macroless_generic_const_args)]
 #![allow(long_running_const_eval)]
 #![allow(incomplete_features)]
 
@@ -12,9 +12,8 @@ struct Aligned<T>(pub T);
 static RANDOM: Aligned<[u8; 2_000_000]> = Aligned(*include_bytes!("../random.bin"));
 
 #[allow(unused)]
-const YOINK<T: 'static, const COUNT: usize>: &[T] = const {
-    unsafe { core::slice::from_raw_parts(RANDOM.0.as_ptr().cast::<T>(), COUNT) }
-};
+const YOINK<T: 'static, const COUNT: usize>: &[T] =
+    const { unsafe { core::slice::from_raw_parts(RANDOM.0.as_ptr().cast::<T>(), COUNT) } };
 
 macro_rules! bench_normalize {
     ($([type: $type:ident, count: $count:literal, feature: $feature:literal]),+ $(,)?) => {$(
@@ -41,7 +40,7 @@ macro_rules! bench_cartesian_product {
 
 fn main() {
     #[allow(unused)]
-    use sure::base::Sure;
+    use sure::base::Sure; //
 
     bench_normalize!(
         [ type: u8,    count: 1_000,   feature: "u8-1_000"    ],
