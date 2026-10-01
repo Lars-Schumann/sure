@@ -181,10 +181,10 @@ static FEATURES: &[&str] = &[
 
 fn main() {
     run_git(&["stash", "push"]);
-    let before = multi_bench_round(2);
+    let before = multi_bench_round(1);
 
     run_git(&["stash", "pop"]);
-    let after = multi_bench_round(2);
+    let after = multi_bench_round(1);
 
     println!("diff:");
 

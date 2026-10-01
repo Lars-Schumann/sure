@@ -3,7 +3,6 @@
 #![feature(adt_const_params)]
 #![feature(const_array)]
 #![feature(const_binary_search)]
-#![feature(const_clone)]
 #![feature(const_closures)]
 #![feature(const_cmp)]
 #![feature(const_convert)]
@@ -38,7 +37,7 @@
 //
 extern crate alloc;
 
-mod bendn_sort;
+mod radix_sort;
 mod const_helpers;
 mod macros;
 mod spec;

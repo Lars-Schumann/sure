@@ -4,8 +4,8 @@ use core::marker::ConstParamTy_;
 use core::marker::Destruct;
 use core::marker::Freeze;
 
-use crate::bendn_sort;
 use crate::const_helpers as ch;
+use crate::radix_sort;
 use crate::spec::try_fn_once;
 use crate::sure_eq::SureEq;
 
@@ -38,10 +38,8 @@ pub const NORMALIZE<
 };
 
 /// Returns the input slices concatenated with each other.
-pub const UNION<T: ConstParamTy_ + Copy + Freeze + 'static , const SETS: &'static [&'static [T]]>:
-    &[T] = const {
-    union_(SETS).const_make_global()
-};
+pub const UNION<T: ConstParamTy_ + Copy + Freeze + 'static, const SETS: &'static [&'static [T]]>:
+    &[T] = const { union_(SETS).const_make_global() };
 
 /// Returns the intersection of all input slices.
 pub const INTERSECTION<
@@ -115,12 +113,32 @@ const fn normalize<
         Err(slice) => slice,
     };
 
-    let slice: &[T] = match try_fn_once::<&[T], &[T], &[u32], &[u32]>(slice, normalize_u32) {
-        Ok(normalized) => return deduped(normalized).const_make_global(),
-        Err(slice) => slice,
-    };
+    let mut arr: [T; LEN] = slice.try_into().ok().expect("this is infallible");
+    macro_rules! specialize {
+        ($($ty:ty => $sort_fn:ident),+ ) => {$(
+            arr = match try_fn_once::<[T; LEN], [T; LEN], [$ty; LEN], [$ty; LEN]>(
+                arr, radix_sort::$sort_fn::<LEN>,
+            ) {
+                Ok(sorted) => return deduped(&sorted).const_make_global(),
+                Err(arr) => arr,
+            };
+        )+};
+    }
+    specialize! {
+        u8     => radix_sort_u8,
+        u16    => radix_sort_u16,
+        u32    => radix_sort_u32,
+        u64    => radix_sort_u64,
+        u128   => radix_sort_u128,
+        usize  => radix_sort_usize,
+        i8     => radix_sort_i8,
+        i16    => radix_sort_i16,
+        i32    => radix_sort_i32,
+        i64    => radix_sort_i64,
+        i128   =>  radix_sort_i128,
+        isize  => radix_sort_isize
+    }
 
-    let arr: [T; LEN] = slice.try_into().ok().expect("this is infallible");
     let sorted = ch::sort(arr);
     deduped(&sorted).const_make_global()
 }
@@ -160,11 +178,3 @@ macro_rules! define_normalize_narrow_uint {
 
 define_normalize_narrow_uint!(u8, normalize_u8);
 define_normalize_narrow_uint!(u16, normalize_u16);
-
-#[expect(clippy::trivially_copy_pass_by_ref)]
-const fn normalize_u32(slice: &'static [u32]) -> &'static [u32] {
-    const fn u32_to_usize(v: &u32) -> usize {
-        usize::try_from(*v).ok().unwrap()
-    }
-    bendn_sort::radixsort(slice, u32_to_usize)
-}
