@@ -91,8 +91,8 @@ const fn intersection<T: SureEq + Copy + [const] Destruct>(sets: &[&[T]]) -> Vec
     intersection
 }
 
-#[expect(clippy::ok_expect)]
-const fn normalize<
+#[doc(hidden)]
+pub const fn normalize<
     T: SureEq + [const] Ord + Copy + [const] Destruct + 'static,
     const LEN: usize,
 >(

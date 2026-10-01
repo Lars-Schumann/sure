@@ -13,5 +13,9 @@ keywords = []
 
 [dependencies]
 
+[dev-dependencies]
+fastrand = "2.5.0"
+
+
 [workspace]
 members = ["sure-bench", "sure-run-bench"]
