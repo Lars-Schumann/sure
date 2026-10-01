@@ -99,15 +99,6 @@ where
 
     /// This is a no-op on the contained value.
     ///
-    /// It only sorts the values stored in `SET`.
-    #[must_use]
-    pub const fn sort(self) -> Sure<T, { set::SORT::<T, SET> }> {
-        // SAFETY: `SORT` only sorts the elements in `SET`, so it's output will have identical elements.
-        unsafe { self.cast_unchecked() }
-    }
-
-    /// This is a no-op on the contained value.
-    ///
     /// It only sorts and deduplicates the values stored in `SET`.
     #[must_use]
     pub const fn normalize(self) -> Sure<T, { set::NORMALIZE::<T, SET> }> {

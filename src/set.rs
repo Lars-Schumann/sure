@@ -19,16 +19,6 @@ pub(crate) const CARTESIAN_LENGTH<
     const B: &'static [U],
 >: usize = const { A.len() * B.len() };
 
-/// Returns the input slice but sorted.
-#[expect(clippy::ok_expect)]
-pub const SORT<
-    T: const Ord + ConstParamTy_ + Copy + const Destruct + Freeze + 'static,
-    const SET: &'static [T]
->: &[T] = const {
-    let arr: [T; LENGTH::<T, SET>] = SET.try_into().ok().expect("this is infallible");
-    &ch::sort(arr)
-};
-
 /// Returns the input slice but normalized(sorted + deduplicated).
 pub const NORMALIZE<
     T: SureEq + const Ord + Copy + const Destruct + 'static,

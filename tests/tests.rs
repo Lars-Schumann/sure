@@ -11,10 +11,8 @@ fn basic() {
                 let b: $ty![10, 20]  = $ty::new(10).unwrap();
 
                 let c: $ty![11, 21, 12, 22, 13, 23] = a + b;
-                let d: $ty![11, 12, 13, 21, 22, 23] = c.sort();
                 let e: $ty![11, 12, 13, 21, 22, 23] = c.normalize();
 
-                assert_eq!(d.inner(), 12);
                 assert_eq!(e.inner(), 12);
             }
             {
@@ -22,10 +20,8 @@ fn basic() {
                 let b: $ty![2, 3]       = $ty::new(3).unwrap();
 
                 let c: $ty![5, 3, 5, 3, 5, 3] = a / b;
-                let d: $ty![3, 3, 3, 5, 5, 5] = c.sort();
                 let e: $ty![3, 5            ] = c.normalize();
 
-                assert_eq!(d.inner(), 3);
                 assert_eq!(e.inner(), 3);
             }
             {
@@ -34,10 +30,8 @@ fn basic() {
                 let b: $ty![Range![3..=4]]  = $ty::new(4).unwrap();
 
                 let c: $ty![2, 1, 3, 2, 4, 3] = a - b;
-                let d: $ty![1, 2, 2, 3, 3, 4] = c.sort();
                 let e: $ty![1, 2, 3, 4      ] = c.normalize();
 
-                assert_eq!(d.inner(), 3);
                 assert_eq!(e.inner(), 3);
             }
         )+};
@@ -50,10 +44,8 @@ fn basic() {
                 let b: $ty![-10, 20]   = $ty::new(20).unwrap();
 
                 let c: $ty![-11, 19, -12, 18, -7, 23] = a + b;
-                let d: $ty![-12, -11, -7, 18, 19, 23] = c.sort();
                 let e: $ty![-12, -11, -7, 18, 19, 23] = c.normalize();
 
-                assert_eq!(d.inner(), 18);
                 assert_eq!(e.inner(), 18);
             }
             {
@@ -61,10 +53,8 @@ fn basic() {
                 let b: $ty![2, -3]      = $ty::new(-3).unwrap();
 
                 let c: $ty! [5, -3,  5, -3, 5, -3] = a / b;
-                let d: $ty![-3, -3, -3,  5, 5,  5] = c.sort();
                 let e: $ty![-3,  5            ] = c.normalize();
 
-                assert_eq!(d.inner(), -3);
                 assert_eq!(e.inner(), -3);
             }
             {
@@ -119,7 +109,7 @@ fn all_ranges() {
 
 #[test]
 fn intersections() {
-    use set::SORT;
+    use set::NORMALIZE;
     use sure_i8::Intersection;
     use sure_i8::Range;
 
@@ -139,12 +129,12 @@ fn intersections() {
     );
 
     assert_eq!(
-        SORT::<i8, { Intersection![Range![1..=20], Range![10..=30]] }>,
+        NORMALIZE::<i8, { Intersection![Range![1..=20], Range![10..=30]] }>,
         Range![10..=20]
     );
 
     assert_eq!(
-        SORT::<i8, { Intersection![Range![10..=50], Range![20..=100], Range![30..=40]] }>,
+        NORMALIZE::<i8, { Intersection![Range![10..=50], Range![20..=100], Range![30..=40]] }>,
         Range![30..=40]
     );
 }
