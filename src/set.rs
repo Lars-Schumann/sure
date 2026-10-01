@@ -52,10 +52,14 @@ pub const INTERSECTION<
 const fn deduped<T: SureEq + Copy>(slice: &[T]) -> Vec<T> {
     let [first, ..] = slice else { return vec![] };
 
-    let mut deduped: Vec<T> = vec![*first];
+    let slice_len = slice.len();
+
+    let mut deduped: Vec<T> = Vec::with_capacity(slice_len);
+
+    deduped.push(*first);
 
     let mut i = 1; // starting at the 2nd element, since the first one is always unique
-    while i < slice.len() {
+    while i < slice_len {
         let (previous, current) = (slice[i - 1], slice[i]);
         if previous != current {
             deduped.push(current);
