@@ -24,7 +24,8 @@ pub const NORMALIZE<
     T: SureEq + const Ord + Copy + const Destruct + 'static,
     const SET: &'static [T],
 >: &[T] = const {
-    normalize::<T, {LENGTH::<T, SET>}>(SET)
+    let arr: [T; LENGTH::<T, SET>] = SET.try_into().ok().unwrap();
+    normalize(arr)
 };
 
 /// Returns the input slices concatenated with each other.
@@ -95,26 +96,25 @@ const fn normalize<
     T: SureEq + [const] Ord + Copy + [const] Destruct + 'static,
     const LEN: usize,
 >(
-    slice: &'static [T],
+    arr: [T; LEN],
 ) -> &'static [T] {
-    let slice: &[T] = match try_fn_once::<&[T], Vec<T>, &[u8], Vec<u8>>(slice, normalize_u8) {
+    match try_fn_once::<[T; LEN], Vec<T>, [u8; LEN], Vec<u8>>(arr, normalize_u8) {
         Ok(normalized) => return normalized.const_make_global(),
-        Err(slice) => slice,
-    };
+        Err(_slice) => {}
+    }
 
-    let slice: &[T] = match try_fn_once::<&[T], Vec<T>, &[u16], Vec<u16>>(slice, normalize_u16) {
+    match try_fn_once::<[T; LEN], Vec<T>, [u16; LEN], Vec<u16>>(arr, normalize_u16) {
         Ok(normalized) => return normalized.const_make_global(),
-        Err(slice) => slice,
-    };
+        Err(_slice) => {}
+    }
 
-    let mut arr: [T; LEN] = slice.try_into().ok().expect("this is infallible");
     macro_rules! specialize {
         ($($ty:ty => $sort_fn:ident),+ ) => {$(
-            arr = match try_fn_once::<[T; LEN], [T; LEN], [$ty; LEN], [$ty; LEN]>(
+            match try_fn_once::<[T; LEN], [T; LEN], [$ty; LEN], [$ty; LEN]>(
                 arr, radix_sort::$sort_fn::<LEN>,
             ) {
                 Ok(sorted) => return deduped(&sorted).const_make_global(),
-                Err(arr) => arr,
+                Err(_arr) => {},
             };
         )+};
     }
@@ -140,14 +140,14 @@ const fn normalize<
 macro_rules! define_normalize_narrow_uint {
     ($ty:ty, $name:ident) => {
         #[allow(clippy::large_stack_arrays)]
-        const fn $name(slice: &[$ty]) -> Vec<$ty> {
+        const fn $name<const LEN: usize>(arr: [$ty; LEN]) -> Vec<$ty> {
             const ELEMENT_COUNT: usize = (<$ty>::MAX as usize) + 1;
 
             let mut element_bitset: [bool; ELEMENT_COUNT] = [false; ELEMENT_COUNT];
 
             let mut i: usize = 0;
-            while i < slice.len() {
-                element_bitset[slice[i] as usize] = true;
+            while i < LEN {
+                element_bitset[arr[i] as usize] = true;
                 i += 1;
             }
 
