@@ -49,14 +49,22 @@ const fn deduped<T: SureEq + Copy>(slice: &[T]) -> Vec<T> {
 
     deduped.push(*first);
 
-    let mut i = 1; // starting at the 2nd element, since the first one is always unique
+    let deduped_start: *mut T = deduped.as_mut_ptr();
+
+    let mut i: usize = 1; // starting at the 2nd element, since the first one is always unique
+    let mut next_write_offset: usize = 1;
     while i < slice_len {
         let (previous, current) = (slice[i - 1], slice[i]);
         if previous != current {
-            deduped.push(current);
+            // SAFETY: TODO, do we need to ptr::write here for drop reasons?
+            unsafe { *deduped_start.add(next_write_offset) = current }
+            next_write_offset += 1;
         }
         i += 1;
     }
+
+    // SAFETY: TODO
+    unsafe { deduped.set_len(next_write_offset) }
     deduped
 }
 
