@@ -154,9 +154,13 @@ macro_rules! define_normalize_narrow_uint {
             let mut normalized: Vec<$ty> = Vec::with_capacity(ELEMENT_COUNT);
 
             let mut i: $ty = 0;
+            let mut next_write_offset: usize = 0;
+            let normalized_start: *mut $ty = normalized.as_mut_ptr();
             loop {
                 if element_bitset[i as usize] {
-                    normalized.push(i);
+                    // SAFETY: TODO
+                    unsafe { *normalized_start.add(next_write_offset) = i };
+                    next_write_offset += 1;
                 }
 
                 if i == <$ty>::MAX {
@@ -165,6 +169,8 @@ macro_rules! define_normalize_narrow_uint {
                 i += 1;
             }
 
+            // SAFETY: TODO
+            unsafe { normalized.set_len(next_write_offset) }
             normalized
         }
     };
