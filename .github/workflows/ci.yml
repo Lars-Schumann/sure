@@ -23,5 +23,5 @@ jobs:
       - run: rustup component add clippy-preview
       - run: cargo install cargo-hack
       - run: cargo build --verbose
-      - run: cargo test --verbose # --all-features
+      - run: cargo test --verbose --release # --all-features
       - run: cargo hack clippy --feature-powerset --no-dev-deps
