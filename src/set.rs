@@ -146,10 +146,10 @@ pub const fn normalize<
 }
 
 macro_rules! define_normalize_narrow_uint {
-    ($ty:ty, $name:ident) => {
+    ($num_t:ty, $fn_name:ident) => {
         #[allow(clippy::large_stack_arrays)]
-        const fn $name<const LEN: usize>(arr: [$ty; LEN]) -> Vec<$ty> {
-            const ELEMENT_COUNT: usize = (<$ty>::MAX as usize) + 1;
+        const fn $fn_name<const LEN: usize>(arr: [$num_t; LEN]) -> Vec<$num_t> {
+            const ELEMENT_COUNT: usize = (<$num_t>::MAX as usize) + 1;
 
             let mut element_bitset: [bool; ELEMENT_COUNT] = [false; ELEMENT_COUNT];
 
@@ -159,11 +159,11 @@ macro_rules! define_normalize_narrow_uint {
                 i += 1;
             }
 
-            let mut normalized: Vec<$ty> = Vec::with_capacity(ELEMENT_COUNT);
+            let mut normalized: Vec<$num_t> = Vec::with_capacity(ELEMENT_COUNT);
 
-            let mut i: $ty = 0;
+            let mut i: $num_t = 0;
             let mut next_write_offset: usize = 0;
-            let normalized_start: *mut $ty = normalized.as_mut_ptr();
+            let normalized_start: *mut $num_t = normalized.as_mut_ptr();
             loop {
                 if element_bitset[i as usize] {
                     // SAFETY: TODO
@@ -171,7 +171,7 @@ macro_rules! define_normalize_narrow_uint {
                     next_write_offset += 1;
                 }
 
-                if i == <$ty>::MAX {
+                if i == <$num_t>::MAX {
                     break;
                 }
                 i += 1;
