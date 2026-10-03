@@ -330,7 +330,7 @@ macro_rules! impl_ints {
             }
         }
 
-        #[doc = concat!("A convenience macro to macro writing types take fewer `<{[]}>` brackets.")]
+        #[doc = concat!("A convenience macro for writing the equivalently named type with fewer `<{[]}>` braces.")]
         #[macro_export]
         macro_rules! $t_alias {
             ($elem:literal) => {
