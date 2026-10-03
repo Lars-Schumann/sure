@@ -6,7 +6,7 @@ use crate::set;
 use crate::sure_eq::SureEq;
 
 /// A wrapper type with the invariant:\
-/// The contained value will always be contained in `SET`.
+/// The contained value will always be contained in `SET`, meaning at least one element of `SET` will compare as equal according to [`PartialEq::eq`].
 ///
 /// This invariant may be relied upon for the purposes of `unsafe` code and any safe mechanism to break this invariant are considered to be UB.
 #[derive(Debug, Copy, Clone)]
