@@ -1,67 +1,122 @@
+const fn radix_bits(len: usize) -> u32 {
+    len.saturating_sub(1).bit_width().saturating_sub(2).min(14)
+}
+
+const BUCKETS<const LEN: usize>: usize = const { 1 << radix_bits(LEN) };
+
 macro_rules! radix_sort {
     ($name:ident, $ty:ty, $unsigned:ty, $sign_bit:expr) => {
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        #[allow(
+            clippy::cast_possible_truncation,
+            clippy::cast_possible_wrap,
+            clippy::cast_sign_loss,
+            clippy::manual_bit_width
+        )]
         pub(crate) const fn $name<const N: usize>(mut array: [$ty; N]) -> [$ty; N] {
+            const fn sort<const N: usize>(
+                array: &mut [$ty; N],
+                scratch: &mut [$ty; N],
+                start: usize,
+                end: usize,
+            ) {
+                let len = end - start;
+                if len <= 24 {
+                    let mut i = start + 1;
+                    while i < end {
+                        let value = array[i];
+                        let mut j = i;
+                        while j > start && array[j - 1] > value {
+                            array[j] = array[j - 1];
+                            j -= 1;
+                        }
+                        array[j] = value;
+                        i += 1;
+                    }
+
+                    return;
+                }
+                let mut differences: $unsigned = 0;
+                let first = array[start] as $unsigned;
+                let mut i = start + 1;
+                while i < end {
+                    differences |= first ^ array[i] as $unsigned;
+                    i += 1;
+                }
+                if differences == 0 {
+                    return;
+                }
+                let significant_bits = differences.bit_width();
+                let digit_bits = significant_bits.min(radix_bits(len));
+                let shift = significant_bits - digit_bits;
+                let bucket_count = 1usize << digit_bits;
+                let mask = (bucket_count - 1) as $unsigned;
+                let mut counts = [0usize; BUCKETS::<N>];
+                let mut i = start;
+                while i < end {
+                    let bucket = (((array[i] as $unsigned ^ $sign_bit) >> shift) & mask) as usize;
+                    counts[bucket] += 1;
+                    i += 1;
+                }
+                if shift == 0 {
+                    let prefix = (first ^ $sign_bit) & !mask;
+                    let mut i = start;
+                    let mut bucket = 0;
+                    while bucket < bucket_count {
+                        let value = ((prefix | bucket as $unsigned) ^ $sign_bit) as $ty;
+                        let end = i + counts[bucket];
+                        while i < end {
+                            array[i] = value;
+                            i += 1;
+                        }
+                        bucket += 1;
+                    }
+                    return;
+                }
+                let mut total = start;
+                let mut bucket = 0;
+                while bucket < bucket_count {
+                    let count = counts[bucket];
+                    counts[bucket] = total;
+                    total += count;
+                    bucket += 1;
+                }
+                let mut i = start;
+                while i < end {
+                    let value = array[i];
+                    let bucket = (((value as $unsigned ^ $sign_bit) >> shift) & mask) as usize;
+                    let offset = &mut counts[bucket];
+                    scratch[*offset] = value;
+                    *offset += 1;
+                    i += 1;
+                }
+                array[start..end].copy_from_slice(&scratch[start..end]);
+                let mut start = start;
+                let mut bucket = 0;
+                while bucket < bucket_count {
+                    let end = counts[bucket];
+                    if end - start > 1 {
+                        sort(array, scratch, start, end);
+                    }
+                    start = end;
+                    bucket += 1;
+                }
+            }
             if N < 2 {
                 return array;
             }
-
-            let mut differences: $unsigned = 0;
-            let first = array[0] as $unsigned;
             let mut i = 1;
-            while i < N {
-                differences |= first ^ array[i] as $unsigned;
+            while i < N && array[i - 1] <= array[i] {
                 i += 1;
             }
-            if differences == 0 {
+            if i == N {
                 return array;
             }
-
             let mut scratch = array;
-            let mut source = &mut array;
-            let mut output = &mut scratch;
-            let mut in_scratch = false;
-            let mut shift = 0;
-            while differences != 0 {
-                if differences & 0xff != 0 {
-                    let mut counts = [0usize; 256];
-                    let mut i = 0;
-                    while i < N {
-                        let bucket =
-                            (((source[i] as $unsigned ^ $sign_bit) >> shift) & 0xff) as usize;
-                        counts[bucket] += 1;
-                        i += 1;
-                    }
-
-                    let mut total = 0;
-                    let mut bucket = 0;
-                    while bucket < counts.len() {
-                        let count = counts[bucket];
-                        counts[bucket] = total;
-                        total += count;
-                        bucket += 1;
-                    }
-
-                    let mut i = 0;
-                    while i < N {
-                        let value = source[i];
-                        let bucket = (((value as $unsigned ^ $sign_bit) >> shift) & 0xff) as usize;
-                        output[counts[bucket]] = value;
-                        counts[bucket] += 1;
-                        i += 1;
-                    }
-                    (source, output) = (output, source);
-                    in_scratch = !in_scratch;
-                }
-                differences = (differences as u128 >> 8) as $unsigned;
-                shift += 8;
-            }
-
-            if in_scratch { scratch } else { array }
+            sort(&mut array, &mut scratch, 0, N);
+            array
         }
     };
 }
-
 radix_sort!(radix_sort_u8, u8, u8, 0);
 radix_sort!(radix_sort_u16, u16, u16, 0);
 radix_sort!(radix_sort_u32, u32, u32, 0);
