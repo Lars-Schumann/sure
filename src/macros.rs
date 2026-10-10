@@ -74,9 +74,11 @@ macro_rules! impl_simple_unary_ops {
         #[expect(non_snake_case)]
         mod ${concat(ඞඞ__,$inner_t,_,$trait_fn_name)} {
             use crate::base::Sure;
+            use crate::const_helpers::array_from_fn;
+            use crate::set::LENGTH;
 
             const CODOMAIN<const SET: &'static[$inner_t]>: &[$inner_t] = const {
-                &crate::const_helpers::array_from_fn::<$inner_t, { crate::set::LENGTH::<$inner_t, SET> }>(
+                &array_from_fn::<$inner_t, { LENGTH::<$inner_t, SET> }>(
                     const |i| {
                         let a: $inner_t = SET[i];
                         $op a
@@ -85,13 +87,13 @@ macro_rules! impl_simple_unary_ops {
             };
 
             const impl<const SET: &'static [$inner_t]> $(::$op_trait)+ for Sure<$inner_t, SET> {
-                type Output = Sure<$inner_t, { CODOMAIN::<{ SET }> }>;
+                type Output = Sure<$inner_t, { CODOMAIN::<SET> }>;
 
 
             fn $trait_fn_name(self) -> Self::Output {
                     let self_inner: $inner_t = self.inner();
                     let res_inner: $inner_t = $op self_inner;
-                    // SAFETY: something something cartesian product and pure function... TODO: make this less bad.
+                    // SAFETY: TODO
                     unsafe { Sure::new_unchecked(res_inner) }
                 }
             }
@@ -107,9 +109,11 @@ macro_rules! impl_simple_binary_ops {
         #[expect(non_snake_case)]
         mod ${concat(ඞඞ__,$inner_t,_,$trait_fn_name)} {
             use crate::base::Sure;
+            use crate::const_helpers::array_from_fn;
+            use crate::set::CARTESIAN_LENGTH;
 
-            const CODOMAIN<const A: &'static[$inner_t], const B: &'static[$inner_t]>: &[$inner_t] = const {
-                &crate::const_helpers::array_from_fn::<$inner_t, { crate::set::CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(
+            const CODOMAIN<const A: &'static [$inner_t], const B: &'static [$inner_t]>: &[$inner_t] = const {
+                &array_from_fn::<$inner_t, { CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(
                     const |i| {
                         let b_len: usize = B.len();
                         let a_index: usize = i / b_len;
@@ -121,14 +125,14 @@ macro_rules! impl_simple_binary_ops {
                 )
             };
 
-            const impl<const A_SET: &'static [$inner_t], const B_SET: &'static [$inner_t]> $(::$op_trait)+<Sure<$inner_t,B_SET> > for Sure<$inner_t, A_SET> {
-                type Output = Sure<$inner_t, { CODOMAIN::<{ A_SET }, { B_SET }> }>;
+            const impl<const A: &'static [$inner_t], const B: &'static [$inner_t]> $(::$op_trait)+<Sure<$inner_t, B> > for Sure<$inner_t, A> {
+                type Output = Sure<$inner_t, { CODOMAIN::<A, B> }>;
 
-                fn $trait_fn_name(self, rhs: Sure<$inner_t, B_SET>) -> Self::Output {
-                    let self_inner: $inner_t = self.inner();
-                    let rhs_inner: $inner_t = rhs.inner();
-                    let res_inner: $inner_t = self_inner $op rhs_inner;
-                    // SAFETY: something something cartesian product and pure function... TODO: make this less bad.
+                fn $trait_fn_name(self, b: Sure<$inner_t, B>) -> Self::Output {
+                    let a_inner: $inner_t = self.inner();
+                    let b_inner: $inner_t = b.inner();
+                    let res_inner: $inner_t = a_inner $op b_inner;
+                    // SAFETY: TODO
                     unsafe { Sure::new_unchecked(res_inner) }
                 }
             }
@@ -143,9 +147,11 @@ macro_rules! impl_unary_fns {
         #[expect(non_snake_case)]
         mod ${concat(ඞඞ__,$input_t,_,$fn_name)} {
             use crate::base::Sure;
+            use crate::const_helpers::array_from_fn;
+            use crate::set::LENGTH;
 
             const CODOMAIN<const SET: &'static[$input_t]>: &[$codomain_t] = const {
-                &crate::const_helpers::array_from_fn::<$codomain_t, { crate::set::LENGTH::<$input_t, SET> }>(
+                &array_from_fn::<$codomain_t, { LENGTH::<$input_t, SET> }>(
                     const |i| {
                         let a: $input_t = SET[i];
                         $fn_path(a)
@@ -156,10 +162,10 @@ macro_rules! impl_unary_fns {
             impl<const SET: &'static [$input_t]> Sure<$input_t, SET> {
                 #[doc = crate::macros::$doc_macro_path!(fn_name: $fn_name, input_t: $input_t, codomain_t: $codomain_t)]
                 #[must_use]
-                pub const fn $fn_name(self) -> Sure<$codomain_t, { CODOMAIN::<{ SET }> }> {
+                pub const fn $fn_name(self) -> Sure<$codomain_t, { CODOMAIN::<SET> }> {
                     let input_inner: $input_t = self.inner();
                     let output_inner: $codomain_t = $fn_path(input_inner);
-                    // SAFETY: something something cartesian product and pure function... TODO: make this less bad.
+                    // SAFETY: TODO
                     unsafe { Sure::new_unchecked(output_inner) }
                 }
             }
@@ -170,33 +176,35 @@ macro_rules! impl_unary_fns {
 pub(crate) use impl_unary_fns;
 
 macro_rules! impl_std_binary_fns {
-    ($([fn $fn_name:ident($lhs_t:ident, $rhs_t:ident) -> $codomain_t:ty, fn_path: $fn_path:path]),+ $(,)?) => {$(
+    ($([fn $fn_name:ident($a_t:ident, $b_t:ident) -> $codomain_t:ty, fn_path: $fn_path:path]),+ $(,)?) => {$(
 
         #[expect(non_snake_case)]
-        mod ${concat(ඞඞ__,$lhs_t,_,$rhs_t,_,$fn_name)} {
+        mod ${concat(ඞඞ__,$a_t,_,$b_t,_,$fn_name)} {
             use crate::base::Sure;
+            use crate::const_helpers::array_from_fn;
+            use crate::set::CARTESIAN_LENGTH;
 
-            const CODOMAIN<const LHS: &'static[$lhs_t], const RHS: &'static[$rhs_t]>: &[$codomain_t] = const {
-                &crate::const_helpers::array_from_fn::<$codomain_t, { crate::set::CARTESIAN_LENGTH::<$lhs_t, $rhs_t, LHS, RHS> }>(
+            const CODOMAIN<const A: &'static [$a_t], const B: &'static [$b_t]>: &[$codomain_t] = const {
+                &array_from_fn::<$codomain_t, { CARTESIAN_LENGTH::<$a_t, $b_t, A, B> }>(
                     const |i| {
-                        let rhs_len: usize = RHS.len();
-                        let lhs_index: usize = i / rhs_len;
-                        let rhs_index: usize = i % rhs_len;
-                        let lhs: $lhs_t = LHS[lhs_index];
-                        let rhs: $rhs_t = RHS[rhs_index];
-                        $fn_path(lhs, rhs)
+                        let b_len: usize = B.len();
+                        let a_index: usize = i / b_len;
+                        let b_index: usize = i % b_len;
+                        let a: $a_t = A[a_index];
+                        let b: $b_t = B[b_index];
+                        $fn_path(a, b)
                     }
                 )
             };
 
-            impl<const LHS_SET: &'static [$lhs_t]> Sure<$lhs_t, LHS_SET> {
-                #[doc = concat!("This method is the equivalent of [`",stringify!($lhs_t),"::",stringify!($fn_name),"`].")]
+            impl<const A: &'static [$a_t]> Sure<$a_t, A> {
+                #[doc = concat!("This method is the equivalent of [`",stringify!($a_t),"::",stringify!($fn_name),"`].")]
                 #[must_use]
-                pub const fn $fn_name<const RHS_SET: &'static [$rhs_t]>(self, rhs: Sure<$rhs_t, RHS_SET>) -> Sure<$codomain_t, { CODOMAIN::<{ LHS_SET }, { RHS_SET }> }> {
-                    let lhs_inner: $lhs_t = self.inner();
-                    let rhs_inner: $rhs_t = rhs.inner();
-                    let output_inner: $codomain_t = $fn_path(lhs_inner, rhs_inner);
-                    // SAFETY: something something cartesian product and pure function... TODO: make this less bad.
+                pub const fn $fn_name<const B: &'static [$b_t]>(self, b: Sure<$b_t, B>) -> Sure<$codomain_t, { CODOMAIN::<A, B> }> {
+                    let a_inner: $a_t = self.inner();
+                    let b_inner: $b_t = b.inner();
+                    let output_inner: $codomain_t = $fn_path(a_inner, b_inner);
+                    // SAFETY: TODO
                     unsafe { Sure::new_unchecked(output_inner) }
                 }
             }
