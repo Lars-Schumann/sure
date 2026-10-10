@@ -20,7 +20,7 @@ static _FEATURES: &[&str] = &[
     "isize-95_000",
 ];
 
-static FEATURES: &[&str] = &[
+static __FEATURES: &[&str] = &[
     "u8-1_000",
     "u8-2_000",
     "u8-5_000",
@@ -115,18 +115,25 @@ static FEATURES: &[&str] = &[
 ];
 
 fn main() {
+    let features = __FEATURES;
+
     run_git(&["stash", "push"]);
-    let before = multi_bench_round(1);
+
+    let baseline = multi_bench_round(5, &["baseline"]);
+    let baseline = baseline["baseline"].as_secs_f32();
+
+    let before = multi_bench_round(1, features);
 
     run_git(&["stash", "pop"]);
-    let after = multi_bench_round(1);
+    let after = multi_bench_round(1, features);
 
     println!("diff:");
 
-    for feature in FEATURES {
-        let change_percent = (after[feature].as_secs_f32() - before[feature].as_secs_f32())
-            / before[feature].as_secs_f32()
-            * 100.0;
+    for feature in features {
+        let before_duration = before[feature].as_secs_f32() - baseline;
+        let after_duration = after[feature].as_secs_f32() - baseline;
+
+        let change_percent = (after_duration - before_duration) / before_duration * 100.0;
 
         let change_percent_str = format!("{change_percent:.2}");
 
@@ -140,14 +147,14 @@ fn main() {
     }
 }
 
-fn multi_bench_round(count: usize) -> Map<&'static str, Duration> {
+fn multi_bench_round(count: u32, features: &[&'static str]) -> Map<&'static str, Duration> {
     let mut multi_bench_round: Map<&'static str, Vec<Duration>> =
-        FEATURES.iter().map(|f| (*f, vec![])).collect();
+        features.iter().map(|f| (*f, vec![])).collect();
 
     for round in 0..count {
         println!("Round: {}/{count}", round + 1);
 
-        let bench_round = bench_round();
+        let bench_round = bench_round(features);
 
         for (feature, took) in bench_round {
             multi_bench_round
@@ -162,13 +169,13 @@ fn multi_bench_round(count: usize) -> Map<&'static str, Duration> {
         .collect()
 }
 
-fn bench_round() -> Map<&'static str, Duration> {
+fn bench_round(features: &[&'static str]) -> Map<&'static str, Duration> {
     run_cargo(&["build", "--package", "sure"]);
     run_cargo(&["clean", "--package", "sure-bench"]);
 
     let mut bench_round: Map<&'static str, Duration> = Map::new();
 
-    for feature in FEATURES {
+    for feature in features {
         print!("{feature:12}: ");
         let before = Instant::now();
         run_cargo(&["build", "--package", "sure-bench", "--features", feature]);
