@@ -5,26 +5,29 @@ use crate::const_helpers as ch;
 use crate::set;
 use crate::sure_eq::SureEq;
 
+/// A nicer way of writing `&'static [T]`.
+pub type Set<T> = &'static [T];
+
 /// A wrapper type with the invariant:\
 /// The contained value will always be contained in `SET`, meaning at least one element of `SET` will compare as equal according to [`PartialEq::eq`].
 ///
 /// This invariant may be relied upon for the purposes of `unsafe` code and any safe mechanism to break this invariant are considered to be UB.
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
-pub struct Sure<T: SureEq + 'static, const SET: &'static [T]>(T);
+pub struct Sure<T: SureEq + 'static, const SET: Set<T>>(T);
 
-impl<T, const SET: &'static [T]> Sure<T, SET>
+impl<T, const SET: Set<T>> Sure<T, SET>
 where
     T: Copy + const Destruct + Freeze + SureEq + const Ord + 'static,
 {
     /// The exhaustive set of values that could be stored in this type.
-    pub const SET: &'static [T] = SET;
+    pub const SET: Set<T> = SET;
 
     /// Returns the SET of this type.
     ///
     /// This is the same as `Self::SET`, but can be used where the type of a variable is not easily available.
     #[must_use]
-    pub const fn set(&self) -> &'static [T] {
+    pub const fn set(&self) -> Set<T> {
         SET
     }
 
@@ -111,7 +114,7 @@ where
     ///
     /// It only changes `SET` to `SUPER_SET`, or fails to compile if `SET` isn't a subset of `SUPER_SET`.
     #[must_use]
-    pub const fn widen<const SUPER_SET: &'static [T]>(self) -> Sure<T, SUPER_SET> {
+    pub const fn widen<const SUPER_SET: Set<T>>(self) -> Sure<T, SUPER_SET> {
         ch::const_assert!(
             ch::slice_is_subset(SET, SUPER_SET),
             "Tried to widen a Sure which failed because the target's SET isn't a superset of the original."
@@ -126,7 +129,7 @@ where
     /// # Errors
     ///
     /// Will return `Err(self)` if the given value is not contained in `SET`.
-    pub const fn cast<const NEW_SET: &'static [T]>(self) -> Result<Sure<T, NEW_SET>, Self> {
+    pub const fn cast<const NEW_SET: Set<T>>(self) -> Result<Sure<T, NEW_SET>, Self> {
         match Sure::<T, NEW_SET>::set_contains(&self.inner()) {
             true => Ok(
                 // SAFETY: we just checked precondition #1: `Self::set_contains(value)`
@@ -142,7 +145,7 @@ where
     /// The most common way to argue this is by making sure that `SET` has identical elements to `NEW_SET`,\
     /// or that it's elements are a subset of `NEW_SET`.
     #[must_use]
-    pub const unsafe fn cast_unchecked<const NEW_SET: &'static [T]>(self) -> Sure<T, NEW_SET> {
+    pub const unsafe fn cast_unchecked<const NEW_SET: Set<T>>(self) -> Sure<T, NEW_SET> {
         // SAFETY: we pass the preconditions to the caller
         unsafe { Sure::new_unchecked(self.inner()) }
     }

@@ -37,9 +37,9 @@
 //
 extern crate alloc;
 
-mod radix_sort;
 mod const_helpers;
 mod macros;
+mod radix_sort;
 mod spec;
 
 /// Defines the `Sure` type and its methods.
@@ -50,6 +50,9 @@ pub mod set;
 
 /// The `SureEq` trait and it's implementations which this crate relies on to make some operations sound.
 pub mod sure_eq;
+
+use base::Set;
+use base::Sure;
 
 macros::impl_ints! {
     the_dolla: $,

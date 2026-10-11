@@ -73,11 +73,12 @@ macro_rules! impl_simple_unary_ops {
 
         #[expect(non_snake_case)]
         mod ${concat(ඞඞ__,$inner_t,_,$trait_fn_name)} {
+            use crate::base::Set;
             use crate::base::Sure;
             use crate::const_helpers::array_from_fn;
             use crate::set::LENGTH;
 
-            const CODOMAIN<const SET: &'static[$inner_t]>: &[$inner_t] = const {
+            const CODOMAIN<const SET: Set<$inner_t>>: Set<$inner_t> = const {
                 &array_from_fn::<$inner_t, { LENGTH::<$inner_t, SET> }>(
                     const |i| {
                         let a: $inner_t = SET[i];
@@ -86,7 +87,7 @@ macro_rules! impl_simple_unary_ops {
                 )
             };
 
-            const impl<const SET: &'static [$inner_t]> $(::$op_trait)+ for Sure<$inner_t, SET> {
+            const impl<const SET: Set<$inner_t>> $(::$op_trait)+ for Sure<$inner_t, SET> {
                 type Output = Sure<$inner_t, { CODOMAIN::<SET> }>;
 
 
@@ -108,11 +109,12 @@ macro_rules! impl_simple_binary_ops {
 
         #[expect(non_snake_case)]
         mod ${concat(ඞඞ__,$inner_t,_,$trait_fn_name)} {
+            use crate::base::Set;
             use crate::base::Sure;
             use crate::const_helpers::array_from_fn;
             use crate::set::CARTESIAN_LENGTH;
 
-            const CODOMAIN<const A: &'static [$inner_t], const B: &'static [$inner_t]>: &[$inner_t] = const {
+            const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = const {
                 &array_from_fn::<$inner_t, { CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(
                     const |i| {
                         let b_len: usize = B.len();
@@ -125,7 +127,7 @@ macro_rules! impl_simple_binary_ops {
                 )
             };
 
-            const impl<const A: &'static [$inner_t], const B: &'static [$inner_t]> $(::$op_trait)+<Sure<$inner_t, B> > for Sure<$inner_t, A> {
+            const impl<const A: Set<$inner_t>, const B: Set<$inner_t>> $(::$op_trait)+<Sure<$inner_t, B> > for Sure<$inner_t, A> {
                 type Output = Sure<$inner_t, { CODOMAIN::<A, B> }>;
 
                 fn $trait_fn_name(self, b: Sure<$inner_t, B>) -> Self::Output {
@@ -146,11 +148,12 @@ macro_rules! impl_unary_fns {
 
         #[expect(non_snake_case)]
         mod ${concat(ඞඞ__,$input_t,_,$fn_name)} {
+            use crate::base::Set;
             use crate::base::Sure;
             use crate::const_helpers::array_from_fn;
             use crate::set::LENGTH;
 
-            const CODOMAIN<const SET: &'static[$input_t]>: &[$codomain_t] = const {
+            const CODOMAIN<const SET: Set<$input_t>>: Set<$codomain_t> = const {
                 &array_from_fn::<$codomain_t, { LENGTH::<$input_t, SET> }>(
                     const |i| {
                         let a: $input_t = SET[i];
@@ -159,7 +162,7 @@ macro_rules! impl_unary_fns {
                 )
             };
 
-            impl<const SET: &'static [$input_t]> Sure<$input_t, SET> {
+            impl<const SET: Set<$input_t>> Sure<$input_t, SET> {
                 #[doc = crate::macros::$doc_macro_path!(fn_name: $fn_name, input_t: $input_t, codomain_t: $codomain_t)]
                 #[must_use]
                 pub const fn $fn_name(self) -> Sure<$codomain_t, { CODOMAIN::<SET> }> {
@@ -180,11 +183,12 @@ macro_rules! impl_std_binary_fns {
 
         #[expect(non_snake_case)]
         mod ${concat(ඞඞ__,$a_t,_,$b_t,_,$fn_name)} {
+            use crate::base::Set;
             use crate::base::Sure;
             use crate::const_helpers::array_from_fn;
             use crate::set::CARTESIAN_LENGTH;
 
-            const CODOMAIN<const A: &'static [$a_t], const B: &'static [$b_t]>: &[$codomain_t] = const {
+            const CODOMAIN<const A: Set<$a_t>, const B: Set<$b_t>>: Set<$codomain_t> = const {
                 &array_from_fn::<$codomain_t, { CARTESIAN_LENGTH::<$a_t, $b_t, A, B> }>(
                     const |i| {
                         let b_len: usize = B.len();
@@ -197,10 +201,10 @@ macro_rules! impl_std_binary_fns {
                 )
             };
 
-            impl<const A: &'static [$a_t]> Sure<$a_t, A> {
+            impl<const A: Set<$a_t>> Sure<$a_t, A> {
                 #[doc = concat!("This method is the equivalent of [`",stringify!($a_t),"::",stringify!($fn_name),"`].")]
                 #[must_use]
-                pub const fn $fn_name<const B: &'static [$b_t]>(self, b: Sure<$b_t, B>) -> Sure<$codomain_t, { CODOMAIN::<A, B> }> {
+                pub const fn $fn_name<const B: Set<$b_t>>(self, b: Sure<$b_t, B>) -> Sure<$codomain_t, { CODOMAIN::<A, B> }> {
                     let a_inner: $a_t = self.inner();
                     let b_inner: $b_t = b.inner();
                     let output_inner: $codomain_t = $fn_path(a_inner, b_inner);
@@ -218,7 +222,7 @@ macro_rules! impl_ints {
     (the_dolla: $d:tt, $([num_t: $num_t:ident, unsigned_num_t: $unsigned_num_t:ident, signed_num_t: $signed_num_t:ident, t_alias: $t_alias:ident, wide_num_t: $wide_num_t:ident, private_macro_prefix: $private_macro_prefix:ident, extra_mod: $extra_mod:ident],)*) => {$(
 
         #[doc = concat!("A type alias for `Sure<",stringify!($num_t),", _>`.")]
-        pub type $t_alias<const SET: &'static [$num_t]> = base::Sure<$num_t, SET>;
+        pub type $t_alias<const SET: Set<$num_t>> = Sure<$num_t, SET>;
 
         #[doc = concat!("Helper consts for `",stringify!($t_alias),"`.")]
         pub mod $extra_mod {
@@ -328,7 +332,7 @@ macro_rules! impl_ints {
 
         }
 
-        impl<const SET: &'static [$num_t]> crate::base::Sure<$num_t, SET> {
+        impl<const SET: Set<$num_t>> Sure<$num_t, SET> {
             #[doc = concat!("Creates a `NonZero<",stringify!($num_t),">`, or fails to compile if this could fail.")]
             pub const fn to_non_zero(self) -> core::num::NonZero<$num_t> {
                 const { assert!(!Self::set_contains(&0), "Sure containing a 0 cannot be converted to NonZero")}
