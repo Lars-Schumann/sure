@@ -40,7 +40,7 @@ macro_rules! bench_cartesian_product {
 
 fn main() {
     #[allow(unused)]
-    use sure::base::Sure; //
+    use sure::Sure;
 
     bench_normalize!(
         [ type: u8,    count: 1_000,  feature: "u8-1_000"     ],

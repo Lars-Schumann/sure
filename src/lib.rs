@@ -43,7 +43,7 @@ mod radix_sort;
 mod spec;
 
 /// Defines the `Sure` type and its methods.
-pub mod base;
+mod base;
 
 /// Helpers for common set operations.
 pub mod set;
@@ -51,8 +51,8 @@ pub mod set;
 /// The `SureEq` trait and it's implementations which this crate relies on to make some operations sound.
 pub mod sure_eq;
 
-use base::Set;
-use base::Sure;
+pub use base::Set;
+pub use base::Sure;
 
 macros::impl_ints! {
     the_dolla: $,

@@ -346,13 +346,13 @@ macro_rules! impl_ints {
         #[macro_export]
         macro_rules! $t_alias {
             ($elem:literal) => {
-                $d crate::base::Sure::<$num_t, { &[$elem] }>
+                $d crate::Sure::<$num_t, { &[$elem] }>
             };
             ($set:expr) => {
-                $d crate::base::Sure::<$num_t, { $set }>
+                $d crate::Sure::<$num_t, { $set }>
             };
             ($d($elem:expr),+ $d(,)?) => {
-                $d crate::base::Sure::<$num_t, { &[$d($elem, )+] }>
+                $d crate::Sure::<$num_t, { &[$d($elem, )+] }>
             };
         }
 

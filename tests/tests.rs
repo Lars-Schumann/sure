@@ -167,7 +167,7 @@ fn cast() {
 
 #[test]
 fn generic() {
-    use sure::base::Sure;
+    use sure::Sure;
 
     let a: Sure<u8, { &[5, 4] }> = Sure::new(5).unwrap();
     let b: Sure<u8, { &[1, 2] }> = Sure::new(2).unwrap();
@@ -182,7 +182,7 @@ fn generic() {
 
 #[test]
 fn generic2() {
-    use sure::base::Sure;
+    use sure::Sure;
     use sure::sure_u16::Range;
 
     const {
@@ -196,7 +196,7 @@ fn generic2() {
 
 #[test]
 fn to_as() {
-    use sure::base::Sure;
+    use sure::Sure;
     use sure::sure_i8::Range as RangeI8;
     use sure::sure_i8::Union;
     use sure::sure_u16::Range as RangeU16;
@@ -210,7 +210,7 @@ fn to_as() {
 
 #[test]
 fn to_nonzero() {
-    use sure::base::Sure;
+    use sure::Sure;
     let set_not_zero: SureI32![1, 2, 3] = Sure::new(1).unwrap();
     let _real_non_zero: core::num::NonZeroI32 = set_not_zero.to_non_zero();
 }

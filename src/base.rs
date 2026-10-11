@@ -1,5 +1,4 @@
 use core::marker::Destruct;
-use core::marker::Freeze;
 
 use crate::const_helpers as ch;
 use crate::set;
