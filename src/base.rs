@@ -14,11 +14,11 @@ pub type Set<T> = &'static [T];
 /// This invariant may be relied upon for the purposes of `unsafe` code and any safe mechanism to break this invariant are considered to be UB.
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
-pub struct Sure<T: SureEq + 'static, const SET: Set<T>>(T);
+pub struct Sure<T: SureEq, const SET: Set<T>>(T);
 
 impl<T, const SET: Set<T>> Sure<T, SET>
 where
-    T: Copy + const Destruct + Freeze + SureEq + const Ord + 'static,
+    T: Copy + const Destruct + SureEq + const Ord,
 {
     /// The exhaustive set of values that could be stored in this type.
     pub const SET: Set<T> = SET;

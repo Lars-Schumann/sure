@@ -20,7 +20,7 @@ use core::marker::Freeze;
 /// (FIXME: the above doesn't account for the fact that this wouldn't make the `Eq` impl `const`).
 ///
 /// If these conditions are fulfilled, this is sufficient to argue that the 3 required preconditions are followed.
-pub unsafe trait SureEq: const Eq + Freeze + ConstParamTy_ {}
+pub unsafe trait SureEq: const Eq + Freeze + ConstParamTy_ + 'static {}
 
 // SAFETY:
 // For the primitives below, these are the reasons why each required condition is satisfied.

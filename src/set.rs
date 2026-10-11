@@ -1,44 +1,31 @@
 use alloc::vec;
 use alloc::vec::Vec;
-use core::marker::ConstParamTy_;
 use core::marker::Destruct;
-use core::marker::Freeze;
 
+use crate::base::Set;
 use crate::const_helpers as ch;
 use crate::radix_sort;
 use crate::spec::try_fn_once;
 use crate::sure_eq::SureEq;
 
-pub(crate) const LENGTH<T: ConstParamTy_ + 'static, const SET: &'static [T]>: usize =
-    const { SET.len() };
+pub(crate) const LENGTH<T: SureEq, const SET: Set<T>>: usize = const { SET.len() };
 
-pub(crate) const CARTESIAN_LENGTH<
-    T: ConstParamTy_ + 'static,
-    U: ConstParamTy_ + 'static,
-    const A: &'static [T],
-    const B: &'static [U],
->: usize = const { A.len() * B.len() };
+pub(crate) const CARTESIAN_LENGTH<T: SureEq, U: SureEq, const A: Set<T>, const B: Set<U>>: usize =
+    const { A.len() * B.len() };
 
 /// Returns the input slice but normalized(sorted + deduplicated).
-pub const NORMALIZE<
-    T: SureEq + const Ord + Copy + const Destruct + 'static,
-    const SET: &'static [T],
->: &[T] = const {
+pub const NORMALIZE<T: SureEq + const Ord + Copy + const Destruct, const SET: Set<T>>: Set<T> = const {
     let arr: [T; LENGTH::<T, SET>] = SET.try_into().ok().unwrap();
     normalize(arr)
 };
 
 /// Returns the input slices concatenated with each other.
-pub const UNION<T: ConstParamTy_ + Copy + Freeze + 'static, const SETS: &'static [&'static [T]]>:
-    &[T] = const { union_(SETS).const_make_global() };
+pub const UNION<T: SureEq + Copy, const SETS: Set<Set<T>>>: Set<T> =
+    const { union_(SETS).const_make_global() };
 
 /// Returns the intersection of all input slices.
-pub const INTERSECTION<
-    T: SureEq + Copy + const Destruct + 'static ,
-    const SETS: &'static [&'static [T]],
->: &[T] = const {
-    intersection(SETS).const_make_global()
-};
+pub const INTERSECTION<T: SureEq + Copy + const Destruct, const SETS: Set<Set<T>>>: Set<T> =
+    const { intersection(SETS).const_make_global() };
 
 const fn deduped<T: SureEq + Copy>(slice: &[T]) -> Vec<T> {
     let [first, ..] = slice else { return vec![] };
@@ -100,12 +87,9 @@ const fn intersection<T: SureEq + Copy + [const] Destruct>(sets: &[&[T]]) -> Vec
 }
 
 #[doc(hidden)]
-pub const fn normalize<
-    T: SureEq + [const] Ord + Copy + [const] Destruct + 'static,
-    const LEN: usize,
->(
+pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const LEN: usize>(
     arr: [T; LEN],
-) -> &'static [T] {
+) -> Set<T> {
     match try_fn_once::<[T; LEN], Vec<T>, [u8; LEN], Vec<u8>>(arr, normalize_u8) {
         Ok(normalized) => return normalized.const_make_global(),
         Err(_slice) => {}
