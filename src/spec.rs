@@ -1,6 +1,20 @@
 use core::any::TypeId;
-use core::intrinsics::transmute_unchecked;
 use core::marker::Destruct;
+use core::mem::ManuallyDrop;
+
+const unsafe fn transmute_unchecked<Src, Dst>(src: Src) -> Dst {
+    union Transmute<Src, Dst> {
+        src: ManuallyDrop<Src>,
+        dst: ManuallyDrop<Dst>,
+    }
+
+    let value = Transmute {
+        src: ManuallyDrop::new(src),
+    };
+
+    // SAFETY: caller has the responsibility of checking that this is fine
+    ManuallyDrop::into_inner(unsafe { value.dst })
+}
 
 #[expect(unused)]
 const fn type_eq<T: 'static, U: 'static>() -> bool {

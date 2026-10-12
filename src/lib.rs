@@ -12,7 +12,6 @@
 #![feature(const_ops)]
 #![feature(const_result_trait_fn)]
 #![feature(const_trait_impl)]
-#![feature(core_intrinsics)]
 #![feature(freeze)]
 #![feature(gca_const_items)]
 #![feature(gca_macroless_args)]
