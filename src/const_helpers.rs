@@ -1,6 +1,5 @@
 use alloc::vec::Vec;
 use core::marker::Destruct;
-use core::mem::MaybeUninit;
 
 use crate::sure_eq::SureEq;
 
@@ -158,18 +157,22 @@ macro_rules! const_assert {
 }
 pub(crate) use const_assert;
 
-pub(crate) const fn array_from_fn<T, const N: usize>(
-    f: impl [const] Fn(usize) -> T + [const] Destruct,
-) -> [T; N] {
-    let mut array: [MaybeUninit<T>; N] = [const { MaybeUninit::uninit() }; N];
+macro_rules! array_from_fn {
+    ($ty:ty, $len:expr, const |$i:ident| { $($fn:tt)* }) => {{
+        use ::core::mem::MaybeUninit;
 
-    let mut i = 0;
+        let mut array: [MaybeUninit<$ty>; $len] = [const { MaybeUninit::uninit() }; _];
+        let mut $i: usize = 0;
 
-    while i < N {
-        array[i] = MaybeUninit::new(f(i));
-        i += 1;
-    }
+        let array_len: usize = array.len();
+        while $i < array_len {
+            let value: $ty = { $($fn)* };
+            array[$i] = MaybeUninit::new(value);
+            $i += 1;
+        }
 
-    // SAFETY: every element has been initialized above
-    unsafe { MaybeUninit::array_assume_init(array) }
+        // SAFETY: every element has been initialized above
+        unsafe { MaybeUninit::array_assume_init(array) }
+    }};
 }
+pub(crate) use array_from_fn;

@@ -5,27 +5,12 @@ use std::process::Stdio;
 use std::time::Duration;
 use std::time::Instant;
 
-static _FEATURES: &[&str] = &[
-    "u8-95_000",
-    "i8-95_000",
-    "u16-95_000",
-    "i16-95_000",
-    "u32-95_000",
-    "i32-95_000",
-    "u64-95_000",
-    "i64-95_000",
-    "u128-95_000",
-    "i128-95_000",
-    "usize-95_000",
-    "isize-95_000",
-];
-
 static __FEATURES: &[&str] = &[
-    "u8-1_000",
-    "u8-2_000",
-    "u8-5_000",
-    "u8-10_000",
-    "u8-20_000",
+    // "u8-1_000",
+    // "u8-2_000",
+    // "u8-5_000",
+    // "u8-10_000",
+    // "u8-20_000",
     // "u8-50_000",
     // "u8-95_000",
     // "u16-1_000",
@@ -105,13 +90,13 @@ static __FEATURES: &[&str] = &[
     // "isize-20_000",
     // "isize-50_000",
     // "isize-95_000",
-    // "i32-cartesian-1_000",
-    // "i32-cartesian-2_000",
-    // "i32-cartesian-5_000",
-    // "i32-cartesian-10_000",
-    // "i32-cartesian-20_000",
-    // "i32-cartesian-50_000",
-    // "i32-cartesian-95_000",
+    "i32-cartesian-1_000",
+    "i32-cartesian-2_000",
+    "i32-cartesian-5_000",
+    "i32-cartesian-10_000",
+    "i32-cartesian-20_000",
+    "i32-cartesian-50_000",
+    "i32-cartesian-95_000",
 ];
 
 fn main() {

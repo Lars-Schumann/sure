@@ -78,20 +78,18 @@ macro_rules! impl_simple_unary_ops {
             use crate::const_helpers::array_from_fn;
             use crate::set::LENGTH;
 
-            const CODOMAIN<const SET: Set<$inner_t>>: Set<$inner_t> = const {
-                &array_from_fn::<$inner_t, { LENGTH::<$inner_t, SET> }>(
-                    const |i| {
-                        let a: $inner_t = SET[i];
-                        $op a
-                    }
-                )
+            const CODOMAIN<const SET: Set<$inner_t>>: Set<$inner_t> = {
+                &array_from_fn!($inner_t, LENGTH::<$inner_t, SET>, const |i| {
+                    let a: $inner_t = SET[i];
+                    $op a
+                })
             };
 
             const impl<const SET: Set<$inner_t>> $(::$op_trait)+ for Sure<$inner_t, SET> {
                 type Output = Sure<$inner_t, { CODOMAIN::<SET> }>;
 
 
-            fn $trait_fn_name(self) -> Self::Output {
+                fn $trait_fn_name(self) -> Self::Output {
                     let self_inner: $inner_t = self.inner();
                     let res_inner: $inner_t = $op self_inner;
                     // SAFETY: TODO
@@ -114,17 +112,15 @@ macro_rules! impl_simple_binary_ops {
             use crate::const_helpers::array_from_fn;
             use crate::set::CARTESIAN_LENGTH;
 
-            const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = const {
-                &array_from_fn::<$inner_t, { CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(
-                    const |i| {
-                        let b_len: usize = B.len();
-                        let a_index: usize = i / b_len;
-                        let b_index: usize = i % b_len;
-                        let a: $inner_t = A[a_index];
-                        let b: $inner_t = B[b_index];
-                        a $op b
-                    }
-                )
+            const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = {
+                &array_from_fn!($inner_t, CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B>, const |i| {
+                    let b_len: usize = B.len();
+                    let a_index: usize = i / b_len;
+                    let b_index: usize = i % b_len;
+                    let a: $inner_t = A[a_index];
+                    let b: $inner_t = B[b_index];
+                    a $op b
+                })
             };
 
             const impl<const A: Set<$inner_t>, const B: Set<$inner_t>> $(::$op_trait)+<Sure<$inner_t, B> > for Sure<$inner_t, A> {
@@ -153,13 +149,11 @@ macro_rules! impl_unary_fns {
             use crate::const_helpers::array_from_fn;
             use crate::set::LENGTH;
 
-            const CODOMAIN<const SET: Set<$input_t>>: Set<$codomain_t> = const {
-                &array_from_fn::<$codomain_t, { LENGTH::<$input_t, SET> }>(
-                    const |i| {
-                        let a: $input_t = SET[i];
-                        $fn_path(a)
-                    }
-                )
+            const CODOMAIN<const SET: Set<$input_t>>: Set<$codomain_t> = {
+                &array_from_fn!($codomain_t, LENGTH::<$input_t, SET>, const |i| {
+                    let a: $input_t = SET[i];
+                    $fn_path(a)
+                })
             };
 
             impl<const SET: Set<$input_t>> Sure<$input_t, SET> {
@@ -188,17 +182,15 @@ macro_rules! impl_std_binary_fns {
             use crate::const_helpers::array_from_fn;
             use crate::set::CARTESIAN_LENGTH;
 
-            const CODOMAIN<const A: Set<$a_t>, const B: Set<$b_t>>: Set<$codomain_t> = const {
-                &array_from_fn::<$codomain_t, { CARTESIAN_LENGTH::<$a_t, $b_t, A, B> }>(
-                    const |i| {
-                        let b_len: usize = B.len();
-                        let a_index: usize = i / b_len;
-                        let b_index: usize = i % b_len;
-                        let a: $a_t = A[a_index];
-                        let b: $b_t = B[b_index];
-                        $fn_path(a, b)
-                    }
-                )
+            const CODOMAIN<const A: Set<$a_t>, const B: Set<$b_t>>: Set<$codomain_t> = {
+                &array_from_fn!($codomain_t, CARTESIAN_LENGTH::<$a_t, $b_t, A, B>, const |i| {
+                    let b_len: usize = B.len();
+                    let a_index: usize = i / b_len;
+                    let b_index: usize = i % b_len;
+                    let a: $a_t = A[a_index];
+                    let b: $b_t = B[b_index];
+                    $fn_path(a, b)
+                })
             };
 
             impl<const A: Set<$a_t>> Sure<$a_t, A> {
