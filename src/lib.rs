@@ -20,7 +20,6 @@
 #![feature(generic_const_items)]
 #![feature(generic_const_parameter_types)]
 #![feature(macro_metavar_expr_concat)]
-#![feature(maybe_uninit_array_assume_init)]
 #![feature(unsized_const_params)]
 //
 #![deny(missing_docs)]

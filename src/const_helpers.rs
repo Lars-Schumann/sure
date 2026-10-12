@@ -158,21 +158,24 @@ macro_rules! const_assert {
 pub(crate) use const_assert;
 
 macro_rules! array_from_fn {
-    ($ty:ty, $len:expr, const |$i:ident| { $($fn:tt)* }) => {{
-        use ::core::mem::MaybeUninit;
+    ($ty:ty, $len:expr, const |$i:ident| $body:block) => {{
+        use core::mem::MaybeUninit;
+        use core::ptr::write;
 
-        let mut array: [MaybeUninit<$ty>; $len] = [const { MaybeUninit::uninit() }; _];
-        let mut $i: usize = 0;
+        let mut array = MaybeUninit::<[$ty; $len]>::uninit();
+        let ptr = array.as_mut_ptr();
+        let mut index: usize = 0;
 
-        let array_len: usize = array.len();
-        while $i < array_len {
-            let value: $ty = { $($fn)* };
-            array[$i] = MaybeUninit::new(value);
-            $i += 1;
+        while index < $len {
+            let $i: usize = index;
+            let value: $ty = $body;
+            // SAFETY: TODO
+            unsafe { write(&raw mut (*ptr)[index], value) };
+            index += 1;
         }
 
-        // SAFETY: every element has been initialized above
-        unsafe { MaybeUninit::array_assume_init(array) }
+        // SAFETY: TODO
+        unsafe { array.assume_init() }
     }};
 }
 pub(crate) use array_from_fn;
