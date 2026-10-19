@@ -73,9 +73,9 @@ pub(crate) use doc_unary_std;
 macro_rules! doc_unary_as {
     (fn_name: $fn_name:ident, input_t: $input_t:ident, codomain_t: $codomain_t:ident) => {
         $crate::concat2!(
-            "This method is the equivalent of: `"{$input_t}" as "{$codomain_t}"`"
-            "**I do not recommend using this method**, it exists purely for completeness."
-            "If at all possible prefer the `.to_"{$codomain_t}"` method, since it is guaranteed to be lossless."
+            "This method is the equivalent of `"{$input_t}" as "{$codomain_t}"`.\n\n"
+            "**I do not recommend using this method**, it exists for completeness.\n\n"
+            "If at all possible, prefer the `.to_"{$codomain_t}"` method, since it is guaranteed to be lossless."
         )
     };
 }
@@ -264,19 +264,19 @@ macro_rules! impl_ints {
                 )
             };
 
-            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `MIN..MAX`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}" values containing the numbers in `MIN..MAX`.")]
             pub const RANGE             <const MIN: $num_t, const MAX: $num_t>: &[$num_t] = RANGE_HELPER::<                MIN ,                 MAX   , false >;
-            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `MIN..`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}" values containing the numbers in `MIN..`.")]
             pub const RANGE_FROM        <const MIN: $num_t                   >: &[$num_t] = RANGE_HELPER::<                MIN ,{const { $num_t::MAX }}, true  >;
             // RANGE_FULL omitted
-            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `MIN..=MAX`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}" values containing the numbers in `MIN..=MAX`.")]
             pub const RANGE_INCLUSIVE   <const MIN: $num_t, const MAX: $num_t>: &[$num_t] = RANGE_HELPER::<                MIN ,                 MAX   , true  >;
-            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `..=MAX`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}" values containing the numbers in `..MAX`.")]
             pub const RANGE_TO          <                   const MAX: $num_t>: &[$num_t] = RANGE_HELPER::<{const{ $num_t::MIN }},               MAX   , false >;
-            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `..=MAX`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}" values containing the numbers in `..=MAX`.")]
             pub const RANGE_TO_INCLUSIVE<                   const MAX: $num_t>: &[$num_t] = RANGE_HELPER::<{const{ $num_t::MIN }},               MAX   , true  >;
 
-            #[doc = concat2!("A macro to make a slice of`"#{$num_t}"'s using the familiar Range syntaxes.")]
+            #[doc = concat2!("A macro to make a slice of "#{$num_t}" values using the familiar range syntax.")]
             #[cfg_attr(doc, doc(hidden))]
             #[macro_export]
             macro_rules! ${ concat($private_macro_prefix, range) } {
@@ -289,7 +289,7 @@ macro_rules! impl_ints {
             }
             pub use ${ concat($private_macro_prefix, range) } as Range;
 
-            #[doc = concat2!("A macro to make a union over of slices of "#{$num_t}"'s.")]
+            #[doc = concat2!("A macro to form the union of slices of "#{$num_t}" values.")]
             #[cfg_attr(doc, doc(hidden))]
             #[macro_export]
             macro_rules! ${ concat($private_macro_prefix, union) } {
@@ -299,7 +299,7 @@ macro_rules! impl_ints {
             }
             pub use ${ concat($private_macro_prefix, union) } as Union;
 
-            #[doc = concat2!("A macro to make a intersection over of slices of "#{$num_t}"'s.")]
+            #[doc = concat2!("A macro to form the intersection of slices of "#{$num_t}" values.")]
             #[cfg_attr(doc, doc(hidden))]
             #[macro_export]
             macro_rules! ${ concat($private_macro_prefix, intersection) } {
@@ -326,7 +326,7 @@ macro_rules! impl_ints {
                 ($d ($ty:ident),+) => {$d(
                     #[inline]
                     pub(crate) const fn $d{ concat(to_, $d ty) }(value: $num_t) -> $ty {
-                        value.try_into().ok().expect(concat2!("Unable to losslessly convert to a "#{$ty}))
+                        value.try_into().ok().expect(concat2!("Unable to losslessly convert to "#{$ty}))
                     }
                 )+}
             }
@@ -336,17 +336,17 @@ macro_rules! impl_ints {
         }
 
         impl<const SET: Set<$num_t>> Sure<$num_t, SET> {
-            #[doc = concat2!("Creates a `NonZero<"{$num_t}">`, or fails to compile if this could fail.")]
+            #[doc = concat2!("Creates a `NonZero<"{$num_t}">` or fails to compile if the value could be zero.")]
             #[inline]
             pub const fn to_non_zero(self) -> core::num::NonZero<$num_t> {
-                const { assert!(!Self::set_contains(&0), "Sure containing a 0 cannot be converted to NonZero")}
+                const { assert!(!Self::set_contains(&0), "A Sure containing 0 cannot be converted to NonZero")}
                 let self_inner = self.inner();
                 // SAFETY: we just asserted that `self_inner` can never be 0
                 unsafe { core::num::NonZero::new_unchecked(self_inner) }
             }
         }
 
-        #[doc = "A convenience macro for writing the equivalently named type with fewer `<{[]}>` braces."]
+        #[doc = "A convenience macro for writing the type of the same name with fewer `<{[]}>` braces."]
         #[macro_export]
         macro_rules! $t_alias {
             ($elem:literal) => {

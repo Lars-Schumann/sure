@@ -113,7 +113,7 @@ fn intersections() {
     use sure_i8::Intersection;
     use sure_i8::Range;
 
-    // Intersection on one set should be the identity
+    // The intersection of one set should be the identity
     assert_eq!(Intersection![Range![-3..27]], Range![-3..27]);
 
     // Intersection of one set with itself should be the identity
@@ -141,10 +141,10 @@ fn intersections() {
 
 #[test]
 fn widen() {
-    // {5} is a subset of 5
+    // {5} is a subset of {5}
     let _: SureU32<{ &[5] }> = <SureU32![5]>::new(5).unwrap().widen();
 
-    // {4} is a subset of {1, 2, 3}
+    // {3} is a subset of {1, 2, 3}
     let _: SureU32![1, 2, 3] = <SureU32![3]>::new(3).unwrap().widen();
 
     // {6, 4} is a subset of {3, 4, 5, 6}

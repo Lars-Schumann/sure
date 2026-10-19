@@ -13,7 +13,7 @@ pub(crate) const LENGTH<T: SureEq, const SET: Set<T>>: usize = const { SET.len()
 pub(crate) const CARTESIAN_LENGTH<T: SureEq, U: SureEq, const A: Set<T>, const B: Set<U>>: usize =
     const { A.len() * B.len() };
 
-/// Returns the input slice but normalized(sorted + deduplicated).
+/// Returns the input slice, normalized (sorted and deduplicated).
 pub const NORMALIZE<T: SureEq + const Ord + Copy + const Destruct, const SET: Set<T>>: Set<T> = const {
     let arr: [T; LENGTH::<T, SET>] = SET.try_into().ok().unwrap();
     normalize(arr)

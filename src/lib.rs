@@ -46,7 +46,7 @@ mod base;
 /// Helpers for common set operations.
 pub mod set;
 
-/// The `SureEq` trait and it's implementations which this crate relies on to make some operations sound.
+/// The `SureEq` trait and its implementations, which this crate relies on to make some operations sound.
 pub mod sure_eq;
 
 pub use base::Set;

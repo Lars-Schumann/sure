@@ -121,8 +121,7 @@ fn main() {
         let change_percent = (after_duration - before_duration) / before_duration * 100.0;
 
         let change_percent_str = format!("{change_percent:.2}");
-
-        let change_pecercent_str = match change_percent {
+        let change_percent_str = match change_percent {
             ..-1.0 => change_percent_str.green(),
             -1.0..=1.0 => change_percent_str.bright_black(),
             1.0.. => change_percent_str.red(),
@@ -130,7 +129,7 @@ fn main() {
         };
 
         let time_str = format!("({before_duration:.3} -> {after_duration:.3})").bright_black();
-        println!("feature: {feature:12}, change: {change_pecercent_str:>6}% {time_str}",);
+        println!("feature: {feature:12}, change: {change_percent_str:>6}% {time_str}",);
     }
 }
 

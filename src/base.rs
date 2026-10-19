@@ -8,9 +8,9 @@ use crate::sure_eq::SureEq;
 pub type Set<T> = &'static [T];
 
 /// A wrapper type with the invariant:\
-/// The contained value will always be contained in `SET`, meaning at least one element of `SET` will compare as equal according to [`PartialEq::eq`].
+/// The contained value is a member of `SET`, meaning at least one element of `SET` will compare equal to it according to [`PartialEq::eq`].
 ///
-/// This invariant may be relied upon for the purposes of `unsafe` code and any safe mechanism to break this invariant are considered to be UB.
+/// This invariant may be relied upon by `unsafe` code, and breaking it is considered undefined behavior (UB).
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
 pub struct Sure<T: SureEq, const SET: Set<T>>(T);
@@ -22,7 +22,7 @@ where
     /// The exhaustive set of values that could be stored in this type.
     pub const SET: Set<T> = SET;
 
-    /// Returns the SET of this type.
+    /// Returns the `SET` of this type.
     ///
     /// This is the same as `Self::SET`, but can be used where the type of a variable is not easily available.
     #[must_use]
@@ -64,15 +64,15 @@ where
     ///
     /// # Safety
     ///
-    /// One of the following conditions must hold, they are all logically equivalent:\
-    /// 1. `Self::set_contains(value)`\
-    /// 2. `Self::new(value).is_some()`\
+    /// One of the following conditions must hold (they are all logically equivalent):\
+    /// 1. `Self::set_contains(&value)`\
+    /// 2. `Self::new(value).is_ok()`\
     /// 3. `Self::SET` contains `value`
     #[must_use]
     pub const unsafe fn new_unchecked(value: T) -> Self {
         debug_assert!(
             Self::set_contains(&value),
-            "Tried to create a Sure with a value thats not contained in its SET, this is UB."
+            "Tried to create a Sure with a value that is not contained in its SET, this is UB."
         );
         Self(value)
     }
@@ -85,9 +85,9 @@ where
 
     /// Checks if the given value is contained in `SET` using a binary search.
     ///
-    /// If the `SET` is not sorted in ascending order this may return `false`, even when the value is actually contained.
+    /// If the `SET` is not sorted in ascending order, this may return `false`, even when the value is actually contained in `SET`.
     ///
-    /// In that sense this function is more conservative than `set_contains`, only returning `true` when `set_contains` would also return `true`.
+    /// In that sense, this function is more conservative than `set_contains`, only returning `true` when `set_contains` would also return `true`.
     #[must_use]
     pub const fn set_contains_via_binary_search(value: &T) -> bool {
         SET.binary_search(value).is_ok()
@@ -104,7 +104,7 @@ where
     /// It only sorts and deduplicates the values stored in `SET`.
     #[must_use]
     pub const fn normalize(self) -> Sure<T, { set::NORMALIZE::<T, SET> }> {
-        // SAFETY: `NORMALIZE` only sorts and deduplicates the elements in `SET`, so it's output will have identical elements.
+        // SAFETY: `NORMALIZE` only sorts and deduplicates the elements in `SET`, so its output will have identical elements.
         // We rely on the unsafe `SureEq` trait to guarantee that we don't delete any unique elements.
         unsafe { self.cast_unchecked() }
     }
@@ -116,7 +116,7 @@ where
     pub const fn widen<const SUPER_SET: Set<T>>(self) -> Sure<T, SUPER_SET> {
         ch::const_assert!(
             ch::slice_is_subset(SET, SUPER_SET),
-            "Tried to widen a Sure which failed because the target's SET isn't a superset of the original."
+            "Tried to widen a Sure, but the target's SET isn't a superset of the original."
         );
 
         // SAFETY: We just asserted that `SET` is a subset of `SUPER_SET`
@@ -127,7 +127,7 @@ where
     ///
     /// # Errors
     ///
-    /// Will return `Err(self)` if the given value is not contained in `SET`.
+    /// Will return `Err(self)` if the given value is not contained in `NEW_SET`.
     pub const fn cast<const NEW_SET: Set<T>>(self) -> Result<Sure<T, NEW_SET>, Self> {
         match Sure::<T, NEW_SET>::set_contains(&self.inner()) {
             true => Ok(
@@ -142,7 +142,7 @@ where
     ///
     /// This inherits the preconditions from `Sure<T, NEW_SET>::new_unchecked(self.inner())`.\
     /// The most common way to argue this is by making sure that `SET` has identical elements to `NEW_SET`,\
-    /// or that it's elements are a subset of `NEW_SET`.
+    /// or that its elements are a subset of `NEW_SET`.
     #[must_use]
     pub const unsafe fn cast_unchecked<const NEW_SET: Set<T>>(self) -> Sure<T, NEW_SET> {
         // SAFETY: we pass the preconditions to the caller
