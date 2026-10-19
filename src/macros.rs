@@ -284,51 +284,35 @@ macro_rules! impl_ints {
             }
             pub use ${ concat($private_macro_prefix, intersection) } as Intersection;
 
-            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss, clippy::cast_possible_wrap)]
-            pub(crate) mod as_fns {
-                #[inline]
-                pub(crate) const fn as_u8   (value: $num_t) -> u8    { value as u8    }
-                #[inline]
-                pub(crate) const fn as_u16  (value: $num_t) -> u16   { value as u16   }
-                #[inline]
-                pub(crate) const fn as_u32  (value: $num_t) -> u32   { value as u32   }
-                #[inline]
-                pub(crate) const fn as_u64  (value: $num_t) -> u64   { value as u64   }
-                #[inline]
-                pub(crate) const fn as_u128 (value: $num_t) -> u128  { value as u128  }
-                #[inline]
-                pub(crate) const fn as_usize(value: $num_t) -> usize { value as usize }
-                #[inline]
-                pub(crate) const fn as_i8   (value: $num_t) -> i8    { value as i8    }
-                #[inline]
-                pub(crate) const fn as_i16  (value: $num_t) -> i16   { value as i16   }
-                #[inline]
-                pub(crate) const fn as_i32  (value: $num_t) -> i32   { value as i32   }
-                #[inline]
-                pub(crate) const fn as_i64  (value: $num_t) -> i64   { value as i64   }
-                #[inline]
-                pub(crate) const fn as_i128 (value: $num_t) -> i128  { value as i128  }
-                #[inline]
-                pub(crate) const fn as_isize(value: $num_t) -> isize { value as isize }
+            macro_rules! as_fns {
+                ($d ($ty:ident),+) => {$d(
+                    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss, clippy::cast_possible_wrap)]
+                    #[inline]
+                    pub(crate) const fn $d{ concat(as_, $d ty) }(value: $num_t) -> $ty {
+                        value as $ty
+                    }
+                )+}
             }
 
-            pub(super) const fn to_u8   (value: $num_t) -> u8    { value.try_into().ok().expect("Unable to losslessly convert to a u8"   ) }
-            pub(super) const fn to_u16  (value: $num_t) -> u16   { value.try_into().ok().expect("Unable to losslessly convert to a u16"  ) }
-            pub(super) const fn to_u32  (value: $num_t) -> u32   { value.try_into().ok().expect("Unable to losslessly convert to a u32"  ) }
-            pub(super) const fn to_u64  (value: $num_t) -> u64   { value.try_into().ok().expect("Unable to losslessly convert to a u64"  ) }
-            pub(super) const fn to_u128 (value: $num_t) -> u128  { value.try_into().ok().expect("Unable to losslessly convert to a u128" ) }
-            pub(super) const fn to_usize(value: $num_t) -> usize { value.try_into().ok().expect("Unable to losslessly convert to a usize") }
-            pub(super) const fn to_i8   (value: $num_t) -> i8    { value.try_into().ok().expect("Unable to losslessly convert to a i8"   ) }
-            pub(super) const fn to_i16  (value: $num_t) -> i16   { value.try_into().ok().expect("Unable to losslessly convert to a i16"  ) }
-            pub(super) const fn to_i32  (value: $num_t) -> i32   { value.try_into().ok().expect("Unable to losslessly convert to a i32"  ) }
-            pub(super) const fn to_i64  (value: $num_t) -> i64   { value.try_into().ok().expect("Unable to losslessly convert to a i64"  ) }
-            pub(super) const fn to_i128 (value: $num_t) -> i128  { value.try_into().ok().expect("Unable to losslessly convert to a i128" ) }
-            pub(super) const fn to_isize(value: $num_t) -> isize { value.try_into().ok().expect("Unable to losslessly convert to a isize") }
+            as_fns!{u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize}
+
+
+            macro_rules! to_fns {
+                ($d ($ty:ident),+) => {$d(
+                    #[inline]
+                    pub(crate) const fn $d{ concat(to_, $d ty) }(value: $num_t) -> $ty {
+                        value.try_into().ok().expect(concat!("Unable to losslessly convert to a ", stringify!($ty)))
+                    }
+                )+}
+            }
+
+            to_fns!{u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize}
 
         }
 
         impl<const SET: Set<$num_t>> Sure<$num_t, SET> {
             #[doc = concat!("Creates a `NonZero<",stringify!($num_t),">`, or fails to compile if this could fail.")]
+            #[inline]
             pub const fn to_non_zero(self) -> core::num::NonZero<$num_t> {
                 const { assert!(!Self::set_contains(&0), "Sure containing a 0 cannot be converted to NonZero")}
                 let self_inner = self.inner();
@@ -507,19 +491,19 @@ macro_rules! impl_ints {
         //~~~~~UNARY~~~~~~
 
         macros::impl_unary_fns! {
-            [ fn as_u8($num_t) -> u8                                      , fn_path: crate::$extra_mod::as_fns::as_u8                  , doc_macro_path: doc_unary_as ],
-            [ fn as_u16($num_t) -> u16                                    , fn_path: crate::$extra_mod::as_fns::as_u16                 , doc_macro_path: doc_unary_as ],
-            [ fn as_u32($num_t) -> u32                                    , fn_path: crate::$extra_mod::as_fns::as_u32                 , doc_macro_path: doc_unary_as ],
-            [ fn as_u64($num_t) -> u64                                    , fn_path: crate::$extra_mod::as_fns::as_u64                 , doc_macro_path: doc_unary_as ],
-            [ fn as_u128($num_t) -> u128                                  , fn_path: crate::$extra_mod::as_fns::as_u128                , doc_macro_path: doc_unary_as ],
-            [ fn as_usize($num_t) -> usize                                , fn_path: crate::$extra_mod::as_fns::as_usize               , doc_macro_path: doc_unary_as ],
+            [ fn as_u8($num_t) -> u8                                      , fn_path: crate::$extra_mod::as_u8                          , doc_macro_path: doc_unary_as ],
+            [ fn as_u16($num_t) -> u16                                    , fn_path: crate::$extra_mod::as_u16                         , doc_macro_path: doc_unary_as ],
+            [ fn as_u32($num_t) -> u32                                    , fn_path: crate::$extra_mod::as_u32                         , doc_macro_path: doc_unary_as ],
+            [ fn as_u64($num_t) -> u64                                    , fn_path: crate::$extra_mod::as_u64                         , doc_macro_path: doc_unary_as ],
+            [ fn as_u128($num_t) -> u128                                  , fn_path: crate::$extra_mod::as_u128                        , doc_macro_path: doc_unary_as ],
+            [ fn as_usize($num_t) -> usize                                , fn_path: crate::$extra_mod::as_usize                       , doc_macro_path: doc_unary_as ],
 
-            [ fn as_i8($num_t) -> i8                                      , fn_path: crate::$extra_mod::as_fns::as_i8                  , doc_macro_path: doc_unary_as ],
-            [ fn as_i16($num_t) -> i16                                    , fn_path: crate::$extra_mod::as_fns::as_i16                 , doc_macro_path: doc_unary_as ],
-            [ fn as_i32($num_t) -> i32                                    , fn_path: crate::$extra_mod::as_fns::as_i32                 , doc_macro_path: doc_unary_as ],
-            [ fn as_i64($num_t) -> i64                                    , fn_path: crate::$extra_mod::as_fns::as_i64                 , doc_macro_path: doc_unary_as ],
-            [ fn as_i128($num_t) -> i128                                  , fn_path: crate::$extra_mod::as_fns::as_i128                , doc_macro_path: doc_unary_as ],
-            [ fn as_isize($num_t) -> isize                                , fn_path: crate::$extra_mod::as_fns::as_isize               , doc_macro_path: doc_unary_as ],
+            [ fn as_i8($num_t) -> i8                                      , fn_path: crate::$extra_mod::as_i8                          , doc_macro_path: doc_unary_as ],
+            [ fn as_i16($num_t) -> i16                                    , fn_path: crate::$extra_mod::as_i16                         , doc_macro_path: doc_unary_as ],
+            [ fn as_i32($num_t) -> i32                                    , fn_path: crate::$extra_mod::as_i32                         , doc_macro_path: doc_unary_as ],
+            [ fn as_i64($num_t) -> i64                                    , fn_path: crate::$extra_mod::as_i64                         , doc_macro_path: doc_unary_as ],
+            [ fn as_i128($num_t) -> i128                                  , fn_path: crate::$extra_mod::as_i128                        , doc_macro_path: doc_unary_as ],
+            [ fn as_isize($num_t) -> isize                                , fn_path: crate::$extra_mod::as_isize                       , doc_macro_path: doc_unary_as ],
 
             [ fn to_u8($num_t) -> u8                                      , fn_path: crate::$extra_mod::to_u8                          , doc_macro_path: doc_unary_to ],
             [ fn to_u16($num_t) -> u16                                    , fn_path: crate::$extra_mod::to_u16                         , doc_macro_path: doc_unary_to ],
