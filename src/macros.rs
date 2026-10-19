@@ -33,22 +33,22 @@ pub(crate) use if_unsigned;
 #[doc(hidden)]
 #[macro_export]
 macro_rules! concat2 {
-    ($literal:literal $(,)?) => {
+    ($literal:literal) => {
         $literal
     };
-    (#{$($tt:tt)+} $(,)?) => {
+    (#{$($tt:tt)+}) => {
         stringify!($($tt)+)
     };
     ({$($tt:tt)+} $(,)?) => {
         stringify!($($tt)+)
     };
-    ($literal:literal, $($tail:tt)*) => {
+    ($literal:literal $($tail:tt)*) => {
         concat!($literal, $crate::concat2!($($tail)*))
     };
-    (#{$($tt:tt)+}, $($tail:tt)*) => {
+    (#{$($tt:tt)+} $($tail:tt)*) => {
         concat!(stringify!($($tt)+), $crate::concat2!($($tail)*))
     };
-    ({$($tt:tt)+}, $($tail:tt)*) => {
+    ({$($tt:tt)+} $($tail:tt)*) => {
         concat!(stringify!($($tt)+), $crate::concat2!($($tail)*))
     };
 }
@@ -56,7 +56,7 @@ macro_rules! concat2 {
 #[rustfmt::skip]
 macro_rules! _doc_unary_debug {
     (fn_name: $fn_name:ident, input_t: $input_t:ident, codomain_t: $codomain_t:ident) => {
-        $crate::concat2!("fn_name: ", #{$fn_name},", input_t: ",#{$input_t},", codomain_t: ",#{$codomain_t},".")
+        $crate::concat2!("fn_name: "#{$fn_name}", input_t: "#{$input_t}", codomain_t: "#{$codomain_t}".")
     };
 }
 // pub(crate) use _doc_unary_debug;
@@ -64,7 +64,7 @@ macro_rules! _doc_unary_debug {
 #[rustfmt::skip]
 macro_rules! doc_unary_std {
     (fn_name: $fn_name:ident, input_t: $input_t:ident, codomain_t: $codomain_t:ident) => {
-        $crate::concat2!("This method is the equivalent of [`",{$input_t},"::",{$fn_name},"`]. glorp")
+        $crate::concat2!("This method is the equivalent of [`"{$input_t}"::"{$fn_name}"`]. glorp")
     };
 }
 pub(crate) use doc_unary_std;
@@ -73,9 +73,9 @@ pub(crate) use doc_unary_std;
 macro_rules! doc_unary_as {
     (fn_name: $fn_name:ident, input_t: $input_t:ident, codomain_t: $codomain_t:ident) => {
         $crate::concat2!(
-            "This method is the equivalent of: `",{$input_t}," as ",{$codomain_t}, "`",
-            "**I do not recommend using this method**, it exists purely for completeness.",
-            "If at all possible prefer the `.to_",{$codomain_t},"` method, since it is guaranteed to be lossless."
+            "This method is the equivalent of: `"{$input_t}" as "{$codomain_t}"`"
+            "**I do not recommend using this method**, it exists purely for completeness."
+            "If at all possible prefer the `.to_"{$codomain_t}"` method, since it is guaranteed to be lossless."
         )
     };
 }
@@ -85,7 +85,7 @@ pub(crate) use doc_unary_as;
 macro_rules! doc_unary_to {
     (fn_name: $fn_name:ident, input_t: $input_t:ident, codomain_t: $codomain_t:ident) => {
         crate::concat2!(
-            "This perfoms a lossless conversion from ",#{$input_t}," to ",#{$codomain_t}," or fails to compile if this isn't possible."
+            "This perfoms a lossless conversion from "#{$input_t}" to "#{$codomain_t}" or fails to compile if this isn't possible."
         )
     };
 }
@@ -218,7 +218,7 @@ macro_rules! impl_std_binary_fns {
             };
 
             impl<const A: Set<$a_t>> Sure<$a_t, A> {
-                #[doc = concat2!("This method is the equivalent of [`",{$a_t},"::",{$fn_name},"`].")]
+                #[doc = concat2!("This method is the equivalent of [`"{$a_t}"::"{$fn_name}"`].")]
                 #[must_use]
                 pub const fn $fn_name<const B: Set<$b_t>>(self, b: Sure<$b_t, B>) -> Sure<$codomain_t, { CODOMAIN::<A, B> }> {
                     let a_inner: $a_t = self.inner();
@@ -237,10 +237,10 @@ pub(crate) use impl_std_binary_fns;
 macro_rules! impl_ints {
     (the_dolla: $d:tt, $([num_t: $num_t:ident, unsigned_num_t: $unsigned_num_t:ident, signed_num_t: $signed_num_t:ident, t_alias: $t_alias:ident, wide_num_t: $wide_num_t:ident, private_macro_prefix: $private_macro_prefix:ident, extra_mod: $extra_mod:ident],)*) => {$(
 
-        #[doc = concat2!("A type alias for `Sure<",{$num_t},", _>`.")]
+        #[doc = concat2!("A type alias for `Sure<"{$num_t}", _>`.")]
         pub type $t_alias<const SET: Set<$num_t>> = Sure<$num_t, SET>;
 
-        #[doc = crate::concat2!("Helper consts for ",#{$t_alias},".")]
+        #[doc = crate::concat2!("Helper consts for "#{$t_alias}".")]
         pub mod $extra_mod {
             use crate::concat2;
 
@@ -264,19 +264,19 @@ macro_rules! impl_ints {
                 )
             };
 
-            #[doc = concat2!("Creates a slice of ",#{$num_t},"'s containing the numbers in `MIN..MAX`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `MIN..MAX`.")]
             pub const RANGE             <const MIN: $num_t, const MAX: $num_t>: &[$num_t] = RANGE_HELPER::<                MIN ,                 MAX   , false >;
-            #[doc = concat2!("Creates a slice of ",#{$num_t},"'s containing the numbers in `MIN..`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `MIN..`.")]
             pub const RANGE_FROM        <const MIN: $num_t                   >: &[$num_t] = RANGE_HELPER::<                MIN ,{const { $num_t::MAX }}, true  >;
             // RANGE_FULL omitted
-            #[doc = concat2!("Creates a slice of ",#{$num_t},"'s containing the numbers in `MIN..=MAX`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `MIN..=MAX`.")]
             pub const RANGE_INCLUSIVE   <const MIN: $num_t, const MAX: $num_t>: &[$num_t] = RANGE_HELPER::<                MIN ,                 MAX   , true  >;
-            #[doc = concat2!("Creates a slice of ",#{$num_t},"'s containing the numbers in `..=MAX`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `..=MAX`.")]
             pub const RANGE_TO          <                   const MAX: $num_t>: &[$num_t] = RANGE_HELPER::<{const{ $num_t::MIN }},               MAX   , false >;
-            #[doc = concat2!("Creates a slice of ",#{$num_t},"'s containing the numbers in `..=MAX`.")]
+            #[doc = concat2!("Creates a slice of "#{$num_t}"'s containing the numbers in `..=MAX`.")]
             pub const RANGE_TO_INCLUSIVE<                   const MAX: $num_t>: &[$num_t] = RANGE_HELPER::<{const{ $num_t::MIN }},               MAX   , true  >;
 
-            #[doc = concat2!("A macro to make a slice of`",#{$num_t},"'s using the familiar Range syntaxes.")]
+            #[doc = concat2!("A macro to make a slice of`"#{$num_t}"'s using the familiar Range syntaxes.")]
             #[cfg_attr(doc, doc(hidden))]
             #[macro_export]
             macro_rules! ${ concat($private_macro_prefix, range) } {
@@ -289,7 +289,7 @@ macro_rules! impl_ints {
             }
             pub use ${ concat($private_macro_prefix, range) } as Range;
 
-            #[doc = concat2!("A macro to make a union over of slices of ",#{$num_t},"'s.")]
+            #[doc = concat2!("A macro to make a union over of slices of "#{$num_t}"'s.")]
             #[cfg_attr(doc, doc(hidden))]
             #[macro_export]
             macro_rules! ${ concat($private_macro_prefix, union) } {
@@ -299,7 +299,7 @@ macro_rules! impl_ints {
             }
             pub use ${ concat($private_macro_prefix, union) } as Union;
 
-            #[doc = concat2!("A macro to make a intersection over of slices of ",#{$num_t},"'s.")]
+            #[doc = concat2!("A macro to make a intersection over of slices of "#{$num_t}"'s.")]
             #[cfg_attr(doc, doc(hidden))]
             #[macro_export]
             macro_rules! ${ concat($private_macro_prefix, intersection) } {
@@ -326,7 +326,7 @@ macro_rules! impl_ints {
                 ($d ($ty:ident),+) => {$d(
                     #[inline]
                     pub(crate) const fn $d{ concat(to_, $d ty) }(value: $num_t) -> $ty {
-                        value.try_into().ok().expect(concat2!("Unable to losslessly convert to a ",#{$ty}))
+                        value.try_into().ok().expect(concat2!("Unable to losslessly convert to a "#{$ty}))
                     }
                 )+}
             }
@@ -336,7 +336,7 @@ macro_rules! impl_ints {
         }
 
         impl<const SET: Set<$num_t>> Sure<$num_t, SET> {
-            #[doc = concat2!("Creates a `NonZero<",{$num_t},">`, or fails to compile if this could fail.")]
+            #[doc = concat2!("Creates a `NonZero<"{$num_t}">`, or fails to compile if this could fail.")]
             #[inline]
             pub const fn to_non_zero(self) -> core::num::NonZero<$num_t> {
                 const { assert!(!Self::set_contains(&0), "Sure containing a 0 cannot be converted to NonZero")}
