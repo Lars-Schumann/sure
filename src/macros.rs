@@ -75,7 +75,7 @@ macro_rules! doc_unary_as {
         $crate::concat2!(
             "This method is the equivalent of `"{$input_t}" as "{$codomain_t}"`.\n\n"
             "**I do not recommend using this method**, it exists for completeness.\n\n"
-            "If at all possible, prefer the `.to_"{$codomain_t}"` method, since it is guaranteed to be lossless."
+            "If at all possible, prefer [`Sure<"{$input_t}", _>::to_"{$codomain_t}"`], since it is guaranteed to be lossless."
         )
     };
 }
