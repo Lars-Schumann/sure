@@ -94,8 +94,7 @@ pub(crate) use doc_unary_to;
 macro_rules! impl_simple_unary_ops {
     ($([inner_t: $inner_t:ident, trait_fn_name: $trait_fn_name:ident, op_trait: $(::$op_trait:ident)+, op: $op:tt]),+ $(,)?) => {$(
 
-        #[expect(non_snake_case)]
-        mod ${concat(ඞඞ__,$inner_t,_,$trait_fn_name)} {
+        mod ${concat($inner_t,_,$trait_fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
             use crate::const_helpers::array_from_fn;
@@ -127,9 +126,7 @@ pub(crate) use impl_simple_unary_ops;
 macro_rules! impl_simple_binary_ops {
     ($([inner_t: $inner_t:ident, trait_fn_name: $trait_fn_name:ident, op_trait: $(::$op_trait:ident)+, op: $op:tt]),+ $(,)?) => {$(
 
-
-        #[expect(non_snake_case)]
-        mod ${concat(ඞඞ__,$inner_t,_,$trait_fn_name)} {
+        mod ${concat($inner_t,_,$trait_fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
             use crate::const_helpers::array_from_fn;
@@ -165,8 +162,7 @@ pub(crate) use impl_simple_binary_ops;
 macro_rules! impl_unary_fns {
     ($([fn $fn_name:ident($input_t:ident) -> $codomain_t:ident, fn_path: $fn_path:path, doc_macro_path: $doc_macro_path:ident]),+ $(,)?) => {$(
 
-        #[expect(non_snake_case)]
-        mod ${concat(ඞඞ__,$input_t,_,$fn_name)} {
+        mod ${concat($input_t,_,$fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
             use crate::const_helpers::array_from_fn;
@@ -198,8 +194,7 @@ pub(crate) use impl_unary_fns;
 macro_rules! impl_std_binary_fns {
     ($([fn $fn_name:ident($a_t:ident, $b_t:ident) -> $codomain_t:ty, fn_path: $fn_path:path]),+ $(,)?) => {$(
 
-        #[expect(non_snake_case)]
-        mod ${concat(ඞඞ__,$a_t,_,$b_t,_,$fn_name)} {
+        mod ${concat($a_t,_,$b_t,_,$fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
             use crate::concat2;
