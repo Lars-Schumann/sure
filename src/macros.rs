@@ -64,7 +64,7 @@ macro_rules! _doc_unary_debug {
 #[rustfmt::skip]
 macro_rules! doc_unary_std {
     (fn_name: $fn_name:ident, input_t: $input_t:ident, codomain_t: $codomain_t:ident) => {
-        $crate::concat2!("This method is the equivalent of [`"{$input_t}"::"{$fn_name}"`]. glorp")
+        $crate::concat2!("This method is the equivalent of [`"{$input_t}"::"{$fn_name}"`].")
     };
 }
 pub(crate) use doc_unary_std;
@@ -85,7 +85,7 @@ pub(crate) use doc_unary_as;
 macro_rules! doc_unary_to {
     (fn_name: $fn_name:ident, input_t: $input_t:ident, codomain_t: $codomain_t:ident) => {
         crate::concat2!(
-            "This perfoms a lossless conversion from "#{$input_t}" to "#{$codomain_t}" or fails to compile if this isn't possible."
+            "This performs a lossless conversion from "#{$input_t}" to "#{$codomain_t}" or fails to compile if this isn't possible."
         )
     };
 }
