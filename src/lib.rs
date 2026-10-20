@@ -1,9 +1,7 @@
 //! Refinement types.
 
 #![feature(adt_const_params)]
-#![feature(const_array)]
 #![feature(const_binary_search)]
-#![feature(const_closures)]
 #![feature(const_cmp)]
 #![feature(const_convert)]
 #![feature(const_destruct)]

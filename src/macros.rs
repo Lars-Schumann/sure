@@ -238,6 +238,7 @@ macro_rules! impl_ints {
         #[doc = crate::concat2!("Helper consts for "#{$t_alias}".")]
         pub mod $extra_mod {
             use crate::concat2;
+            use crate::const_helpers::array_from_fn;
 
             const RANGE_LENGTH_HELPER<const MIN: $num_t, const MAX: $num_t, const IS_INCLUSIVE: bool>: usize = const {
                 let wide_min = $wide_num_t::from(MIN);
@@ -251,12 +252,10 @@ macro_rules! impl_ints {
             const RANGE_HELPER<const MIN: $num_t, const MAX: $num_t, const IS_INCLUSIVE: bool>: &[$num_t] = const {
                 let wide_min = $wide_num_t::from(MIN);
 
-                &core::array::from_fn::<$num_t, { RANGE_LENGTH_HELPER::<MIN, MAX, IS_INCLUSIVE> }, _>(
-                    const |i| {
-                        let wide_index = $wide_num_t::try_from(i).ok().expect("");
-                        $num_t::try_from(wide_min + wide_index).ok().unwrap()
-                    }
-                )
+                &array_from_fn!($num_t, RANGE_LENGTH_HELPER::<MIN, MAX, IS_INCLUSIVE>, const |i| {
+                    let wide_index = $wide_num_t::try_from(i).ok().expect("");
+                    $num_t::try_from(wide_min + wide_index).ok().unwrap()
+                })
             };
 
             #[doc = concat2!("Creates a slice of "#{$num_t}" values containing the numbers in `MIN..MAX`.")]
