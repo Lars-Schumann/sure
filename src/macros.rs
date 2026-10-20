@@ -133,8 +133,8 @@ macro_rules! impl_simple_binary_ops {
             use crate::set::CARTESIAN_LENGTH;
 
             const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = {
+                let b_len: usize = B.len();
                 &array_from_fn!($inner_t, CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B>, const |i| {
-                    let b_len: usize = B.len();
                     let a_index: usize = i / b_len;
                     let b_index: usize = i % b_len;
                     let a: $inner_t = A[a_index];
@@ -202,8 +202,8 @@ macro_rules! impl_std_binary_fns {
             use crate::set::CARTESIAN_LENGTH;
 
             const CODOMAIN<const A: Set<$a_t>, const B: Set<$b_t>>: Set<$codomain_t> = {
+                let b_len: usize = B.len();
                 &array_from_fn!($codomain_t, CARTESIAN_LENGTH::<$a_t, $b_t, A, B>, const |i| {
-                    let b_len: usize = B.len();
                     let a_index: usize = i / b_len;
                     let b_index: usize = i % b_len;
                     let a: $a_t = A[a_index];
