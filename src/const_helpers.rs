@@ -159,22 +159,16 @@ pub(crate) use const_assert;
 
 macro_rules! array_from_fn {
     ($ty:ty, $len:expr, const |$i:ident| $body:block) => {{
-        use core::mem::MaybeUninit;
-
-        let mut array = MaybeUninit::<[$ty; $len]>::uninit();
-        let ptr = array.as_mut_ptr();
+        let mut array: [$ty; $len] = [const { <$ty>::default() }; _];
         let mut index: usize = 0;
 
         while index < $len {
             let $i: usize = index;
-            let value: $ty = $body;
-            // SAFETY: TODO
-            unsafe { (*ptr)[index] = value };
+            array[index] = $body;
             index += 1;
         }
 
-        // SAFETY: TODO
-        unsafe { array.assume_init() }
+        array
     }};
 }
 pub(crate) use array_from_fn;

@@ -4,6 +4,7 @@
 #![feature(const_binary_search)]
 #![feature(const_cmp)]
 #![feature(const_convert)]
+#![feature(const_default)]
 #![feature(const_destruct)]
 #![feature(const_heap)]
 #![feature(const_index)]
