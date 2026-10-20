@@ -37,7 +37,7 @@ macro_rules! concat2 {
         $literal
     };
     (#{$($tt:tt)+}) => {
-        stringify!($($tt)+)
+        concat!("`",stringify!($($tt)+),"`")
     };
     ({$($tt:tt)+} $(,)?) => {
         stringify!($($tt)+)
@@ -46,7 +46,7 @@ macro_rules! concat2 {
         concat!($literal, $crate::concat2!($($tail)*))
     };
     (#{$($tt:tt)+} $($tail:tt)*) => {
-        concat!(stringify!($($tt)+), $crate::concat2!($($tail)*))
+        concat!("`",stringify!($($tt)+),"`", $crate::concat2!($($tail)*))
     };
     ({$($tt:tt)+} $($tail:tt)*) => {
         concat!(stringify!($($tt)+), $crate::concat2!($($tail)*))
