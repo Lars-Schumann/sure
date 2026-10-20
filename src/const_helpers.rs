@@ -160,7 +160,6 @@ pub(crate) use const_assert;
 macro_rules! array_from_fn {
     ($ty:ty, $len:expr, const |$i:ident| $body:block) => {{
         use core::mem::MaybeUninit;
-        use core::ptr::write;
 
         let mut array = MaybeUninit::<[$ty; $len]>::uninit();
         let ptr = array.as_mut_ptr();
@@ -170,7 +169,7 @@ macro_rules! array_from_fn {
             let $i: usize = index;
             let value: $ty = $body;
             // SAFETY: TODO
-            unsafe { write(&raw mut (*ptr)[index], value) };
+            unsafe { (*ptr)[index] = value };
             index += 1;
         }
 
