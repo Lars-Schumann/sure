@@ -26,13 +26,27 @@ macro_rules! bench_normalize {
     )+};
 }
 
-macro_rules! bench_cartesian_product {
+macro_rules! bench_cartesian_product_x1 {
     ($([count: $count:literal, feature: $feature:literal]),+ $(,)?) => {$(
         #[cfg(feature = $feature)]
         {
             use sure::SureI32;
             let a: SureI32<{ YOINK::<i32, $count> }> = SureI32::new(0).unwrap();
             let n: SureI32![2] = Sure::new(2).unwrap();
+            let b: SureI32<_> = a / n;
+        }
+    )+};
+}
+
+macro_rules! bench_cartesian_product_x250 {
+    ($([count: $count:literal, feature: $feature:literal]),+ $(,)?) => {$(
+        #[cfg(feature = $feature)]
+        {
+            use sure::SureI32;
+            use sure::sure_i32::Range;
+
+            let a: SureI32<{ YOINK::<i32, { $count / 250 }> }> = SureI32::new(0).unwrap();
+            let n: SureI32![Range![1..=250]] = Sure::new(2).unwrap();
             let b: SureI32<_> = a / n;
         }
     )+};
@@ -308,28 +322,52 @@ fn main() {
         [ type: isize, count: 95_000, feature: "isize-95_000" ],
     );
 
-    bench_cartesian_product!(
-        [ count: 1_000,   feature: "i32-cartesian-1_000"  ],
-        [ count: 2_000,   feature: "i32-cartesian-2_000"  ],
-        [ count: 5_000,   feature: "i32-cartesian-5_000"  ],
-        [ count: 10_000,  feature: "i32-cartesian-10_000" ],
-        [ count: 15_000,  feature: "i32-cartesian-15_000" ],
-        [ count: 20_000,  feature: "i32-cartesian-20_000" ],
-        [ count: 25_000,  feature: "i32-cartesian-25_000" ],
-        [ count: 30_000,  feature: "i32-cartesian-30_000" ],
-        [ count: 35_000,  feature: "i32-cartesian-35_000" ],
-        [ count: 40_000,  feature: "i32-cartesian-40_000" ],
-        [ count: 45_000,  feature: "i32-cartesian-45_000" ],
-        [ count: 50_000,  feature: "i32-cartesian-50_000" ],
-        [ count: 55_000,  feature: "i32-cartesian-55_000" ],
-        [ count: 60_000,  feature: "i32-cartesian-60_000" ],
-        [ count: 65_000,  feature: "i32-cartesian-65_000" ],
-        [ count: 70_000,  feature: "i32-cartesian-70_000" ],
-        [ count: 75_000,  feature: "i32-cartesian-75_000" ],
-        [ count: 80_000,  feature: "i32-cartesian-80_000" ],
-        [ count: 85_000,  feature: "i32-cartesian-85_000" ],
-        [ count: 90_000,  feature: "i32-cartesian-90_000" ],
-        [ count: 95_000,  feature: "i32-cartesian-95_000" ],
+    bench_cartesian_product_x1!(
+        [ count: 1_000,   feature: "i32-cartesian-1_000x1"  ],
+        [ count: 2_000,   feature: "i32-cartesian-2_000x1"  ],
+        [ count: 5_000,   feature: "i32-cartesian-5_000x1"  ],
+        [ count: 10_000,  feature: "i32-cartesian-10_000x1" ],
+        [ count: 15_000,  feature: "i32-cartesian-15_000x1" ],
+        [ count: 20_000,  feature: "i32-cartesian-20_000x1" ],
+        [ count: 25_000,  feature: "i32-cartesian-25_000x1" ],
+        [ count: 30_000,  feature: "i32-cartesian-30_000x1" ],
+        [ count: 35_000,  feature: "i32-cartesian-35_000x1" ],
+        [ count: 40_000,  feature: "i32-cartesian-40_000x1" ],
+        [ count: 45_000,  feature: "i32-cartesian-45_000x1" ],
+        [ count: 50_000,  feature: "i32-cartesian-50_000x1" ],
+        [ count: 55_000,  feature: "i32-cartesian-55_000x1" ],
+        [ count: 60_000,  feature: "i32-cartesian-60_000x1" ],
+        [ count: 65_000,  feature: "i32-cartesian-65_000x1" ],
+        [ count: 70_000,  feature: "i32-cartesian-70_000x1" ],
+        [ count: 75_000,  feature: "i32-cartesian-75_000x1" ],
+        [ count: 80_000,  feature: "i32-cartesian-80_000x1" ],
+        [ count: 85_000,  feature: "i32-cartesian-85_000x1" ],
+        [ count: 90_000,  feature: "i32-cartesian-90_000x1" ],
+        [ count: 95_000,  feature: "i32-cartesian-95_000x1" ],
+    );
+
+    bench_cartesian_product_x250!(
+        [ count: 1_000,   feature: "i32-cartesian-1_000x250"  ],
+        [ count: 2_000,   feature: "i32-cartesian-2_000x250"  ],
+        [ count: 5_000,   feature: "i32-cartesian-5_000x250"  ],
+        [ count: 10_000,  feature: "i32-cartesian-10_000x250" ],
+        [ count: 15_000,  feature: "i32-cartesian-15_000x250" ],
+        [ count: 20_000,  feature: "i32-cartesian-20_000x250" ],
+        [ count: 25_000,  feature: "i32-cartesian-25_000x250" ],
+        [ count: 30_000,  feature: "i32-cartesian-30_000x250" ],
+        [ count: 35_000,  feature: "i32-cartesian-35_000x250" ],
+        [ count: 40_000,  feature: "i32-cartesian-40_000x250" ],
+        [ count: 45_000,  feature: "i32-cartesian-45_000x250" ],
+        [ count: 50_000,  feature: "i32-cartesian-50_000x250" ],
+        [ count: 55_000,  feature: "i32-cartesian-55_000x250" ],
+        [ count: 60_000,  feature: "i32-cartesian-60_000x250" ],
+        [ count: 65_000,  feature: "i32-cartesian-65_000x250" ],
+        [ count: 70_000,  feature: "i32-cartesian-70_000x250" ],
+        [ count: 75_000,  feature: "i32-cartesian-75_000x250" ],
+        [ count: 80_000,  feature: "i32-cartesian-80_000x250" ],
+        [ count: 85_000,  feature: "i32-cartesian-85_000x250" ],
+        [ count: 90_000,  feature: "i32-cartesian-90_000x250" ],
+        [ count: 95_000,  feature: "i32-cartesian-95_000x250" ],
     );
 
     println!("bench done!");

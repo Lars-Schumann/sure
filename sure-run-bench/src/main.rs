@@ -90,13 +90,22 @@ static __FEATURES: &[&str] = &[
     // "isize-20_000",
     // "isize-50_000",
     // "isize-95_000",
-    "i32-cartesian-1_000",
-    "i32-cartesian-2_000",
-    "i32-cartesian-5_000",
-    "i32-cartesian-10_000",
-    "i32-cartesian-20_000",
-    "i32-cartesian-50_000",
-    "i32-cartesian-95_000",
+    //
+    "i32-cartesian-1_000x1",
+    "i32-cartesian-2_000x1",
+    "i32-cartesian-5_000x1",
+    "i32-cartesian-10_000x1",
+    "i32-cartesian-20_000x1",
+    "i32-cartesian-50_000x1",
+    "i32-cartesian-95_000x1",
+    //
+    "i32-cartesian-1_000x250",
+    "i32-cartesian-2_000x250",
+    "i32-cartesian-5_000x250",
+    "i32-cartesian-10_000x250",
+    "i32-cartesian-20_000x250",
+    "i32-cartesian-50_000x250",
+    "i32-cartesian-95_000x250",
 ];
 
 fn main() {
