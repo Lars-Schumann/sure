@@ -41,6 +41,19 @@
 
           alias msrv="cargo msrv find --linear -- cargo test"
           alias bench="cargo run --package sure-run-bench"
+
+          mir() {
+            CARGO_INCREMENTAL=0 cargo rustc -p sure --lib -- \
+              "-Zdump-mir=''${1:?}" \
+              -Zdump-mir-dir=target/mir
+          }
+
+          # e.g. mircd u8_add -> /target/mir/sure.u8_add-CODOMAIN.3-2-001.CtfeLimit.after.mir
+          mircd() {
+            CARGO_INCREMENTAL=0 cargo rustc -p sure --lib -- \
+              "-Zdump-mir=''${1:?}::CODOMAIN" \
+              -Zdump-mir-dir=target/mir
+          }
         '';
       };
     };
