@@ -43,16 +43,16 @@
           alias bench="cargo run --package sure-run-bench"
 
           mir() {
+            local filter="''${1:?}"
+            cargo clean -p sure --profile dev || return
             CARGO_INCREMENTAL=0 cargo rustc -p sure --lib -- \
-              "-Zdump-mir=''${1:?}" \
+              "-Zdump-mir=$filter" \
               -Zdump-mir-dir=target/mir
           }
 
-          # e.g. mircd u8_add -> /target/mir/sure.u8_add-CODOMAIN.3-2-001.CtfeLimit.after.mir
+          # e.g. mircd u8_add dumps both CODOMAIN and its codomain helper to target/mir.
           mircd() {
-            CARGO_INCREMENTAL=0 cargo rustc -p sure --lib -- \
-              "-Zdump-mir=''${1:?}::CODOMAIN" \
-              -Zdump-mir-dir=target/mir
+            mir "''${1:?}::CODOMAIN|''${1:?}::codomain"
           }
         '';
       };
