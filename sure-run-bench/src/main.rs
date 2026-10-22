@@ -113,13 +113,13 @@ fn main() {
 
     run_git(&["stash", "push"]);
 
-    let baseline = multi_bench_round(20, &["baseline"]);
+    let baseline = multi_bench_round(10, &["baseline"]);
     let baseline = baseline["baseline"].as_secs_f32();
 
-    let before = multi_bench_round(10, features);
+    let before = multi_bench_round(5, features);
 
     run_git(&["stash", "pop"]);
-    let after = multi_bench_round(10, features);
+    let after = multi_bench_round(5, features);
 
     println!("diff:");
 
