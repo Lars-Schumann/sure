@@ -132,14 +132,14 @@ macro_rules! impl_simple_binary_ops {
             use crate::set::CARTESIAN_LENGTH;
 
             #[expect(non_snake_case)]
-            const CODOMAIN<const __A: Set<$inner_t>, const __B: Set<$inner_t>>: Set<$inner_t> = &{
+            const CODOMAIN_IMPL<const __A: Set<$inner_t>, const __B: Set<$inner_t>, const LEN: usize>: Set<$inner_t> = &{
                 let A = __A;
                 let B = __B;
 
                 let a_len = A.len();
                 let b_len = B.len();
 
-                let mut codomain: [$inner_t; CARTESIAN_LENGTH::<$inner_t, $inner_t, __A, __B>] = [<$inner_t>::default(); _];
+                let mut codomain: [$inner_t; LEN] = [<$inner_t>::default(); _];
                 let mut codomain_index: usize = 0;
 
                 let mut a_index: usize = 0;
@@ -157,6 +157,8 @@ macro_rules! impl_simple_binary_ops {
                 }
                 codomain
             };
+
+            const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = CODOMAIN_IMPL::<A, B, { CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>;
 
             const impl<const A: Set<$inner_t>, const B: Set<$inner_t>> $(::$op_trait)+<Sure<$inner_t, B> > for Sure<$inner_t, A> {
                 type Output = Sure<$inner_t, { CODOMAIN::<A, B> }>;
