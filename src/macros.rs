@@ -153,11 +153,11 @@ macro_rules! impl_simple_binary_ops {
                 let mut codomain_chunks_index: usize = 0;
 
                 while a_chunks_index < a_chunks_len {
-                    let &[a1, a2, a3, a4, a5, a6, a7, a8] = &a_chunks[a_chunks_index]; a_chunks_index += 1;
+                    let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunks[a_chunks_index]; a_chunks_index += 1;
 
                     let mut b_chunks_index: usize = 0;
                     while b_chunks_index < b_chunks_len {
-                        let &[b1, b2, b3, b4, b5, b6, b7, b8] = &b_chunks[b_chunks_index]; b_chunks_index += 1;
+                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index]; b_chunks_index += 1;
 
                         codomain_chunks[codomain_chunks_index] = [
                             a1 $op b1, a1 $op b2, a1 $op b3, a1 $op b4, a1 $op b5, a1 $op b6, a1 $op b7, a1 $op b8,
@@ -185,7 +185,7 @@ macro_rules! impl_simple_binary_ops {
                 let mut a_chunks_index: usize = 0;
 
                 while a_chunks_index < a_chunks_len {
-                    let &[a1, a2, a3, a4, a5, a6, a7, a8] = &a_chunks[a_chunks_index]; a_chunks_index += 1;
+                    let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunks[a_chunks_index]; a_chunks_index += 1;
 
                     let mut b_tail_index: usize = 0;
 
@@ -212,7 +212,7 @@ macro_rules! impl_simple_binary_ops {
                     let mut b_chunks_index: usize = 0;
 
                     while b_chunks_index < b_chunks_len {
-                        let &[b1, b2, b3, b4, b5, b6, b7, b8] = &b_chunks[b_chunks_index]; b_chunks_index += 1;
+                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index]; b_chunks_index += 1;
                         codomain_rest[codomain_rest_index] = [
                             a_tail_elem $op b1,
                             a_tail_elem $op b2,
