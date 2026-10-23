@@ -132,6 +132,7 @@ macro_rules! impl_simple_binary_ops {
             use crate::set::CARTESIAN_LENGTH;
 
             #[expect(non_snake_case)]
+            #[expect(clippy::too_many_lines)]
             const fn codomain<const __A: Set<$inner_t>, const __B: Set<$inner_t>, const LEN: usize>() -> [$inner_t; LEN] {
                 let A = __A;
                 let B = __B;
@@ -142,9 +143,9 @@ macro_rules! impl_simple_binary_ops {
                     return codomain;
                 }
 
-                let (a_chunks, a_tail) = A.as_chunks::<4>();
-                let (b_chunks, b_tail) = B.as_chunks::<4>();
-                let (codomain_chunks, _) = codomain.as_chunks_mut::<16>();
+                let (a_chunks, a_tail) = A.as_chunks::<8>();
+                let (b_chunks, b_tail) = B.as_chunks::<8>();
+                let (codomain_chunks, _) = codomain.as_chunks_mut::<64>();
 
                 let (a_chunks_len, a_tail_len) = (a_chunks.len(), a_tail.len());
                 let (b_chunks_len, b_tail_len) = (b_chunks.len(), b_tail.len());
@@ -154,63 +155,128 @@ macro_rules! impl_simple_binary_ops {
 
                 while a_chunks_index < a_chunks_len {
                     let a_chunk = a_chunks[a_chunks_index]; a_chunks_index += 1;
-                    let [a1, a2, a3, a4] = a_chunk;
+                    let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunk;
 
                     let mut b_chunks_index: usize = 0;
                     while b_chunks_index < b_chunks_len {
                         let b_chunk = b_chunks[b_chunks_index]; b_chunks_index += 1;
-                        let [b1, b2, b3, b4] = b_chunk;
+                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunk;
                         let codomain_chunk = &mut codomain_chunks[codomain_chunks_index]; codomain_chunks_index += 1;
 
-                        let [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16] = codomain_chunk;
+                        let [
+                            c01, c02, c03, c04, c05, c06, c07, c08,
+                            c09, c10, c11, c12, c13, c14, c15, c16,
+                            c17, c18, c19, c20, c21, c22, c23, c24,
+                            c25, c26, c27, c28, c29, c30, c31, c32,
+                            c33, c34, c35, c36, c37, c38, c39, c40,
+                            c41, c42, c43, c44, c45, c46, c47, c48,
+                            c49, c50, c51, c52, c53, c54, c55, c56,
+                            c57, c58, c59, c60, c61, c62, c63, c64,
+                        ] = codomain_chunk;
 
-                        *c1 = a1 $op b1;
-                        *c2 = a1 $op b2;
-                        *c3 = a1 $op b3;
-                        *c4 = a1 $op b4;
+                        *c01 = a1 $op b1;
+                        *c02 = a1 $op b2;
+                        *c03 = a1 $op b3;
+                        *c04 = a1 $op b4;
+                        *c05 = a1 $op b5;
+                        *c06 = a1 $op b6;
+                        *c07 = a1 $op b7;
+                        *c08 = a1 $op b8;
 
-                        *c5 = a2 $op b1;
-                        *c6 = a2 $op b2;
-                        *c7 = a2 $op b3;
-                        *c8 = a2 $op b4;
+                        *c09 = a2 $op b1;
+                        *c10 = a2 $op b2;
+                        *c11 = a2 $op b3;
+                        *c12 = a2 $op b4;
+                        *c13 = a2 $op b5;
+                        *c14 = a2 $op b6;
+                        *c15 = a2 $op b7;
+                        *c16 = a2 $op b8;
 
-                        *c9 = a3 $op b1;
-                        *c10 = a3 $op b2;
-                        *c11 = a3 $op b3;
-                        *c12 = a3 $op b4;
+                        *c17 = a3 $op b1;
+                        *c18 = a3 $op b2;
+                        *c19 = a3 $op b3;
+                        *c20 = a3 $op b4;
+                        *c21 = a3 $op b5;
+                        *c22 = a3 $op b6;
+                        *c23 = a3 $op b7;
+                        *c24 = a3 $op b8;
 
-                        *c13 = a4 $op b1;
-                        *c14 = a4 $op b2;
-                        *c15 = a4 $op b3;
-                        *c16 = a4 $op b4;
+                        *c25 = a4 $op b1;
+                        *c26 = a4 $op b2;
+                        *c27 = a4 $op b3;
+                        *c28 = a4 $op b4;
+                        *c29 = a4 $op b5;
+                        *c30 = a4 $op b6;
+                        *c31 = a4 $op b7;
+                        *c32 = a4 $op b8;
+
+                        *c33 = a5 $op b1;
+                        *c34 = a5 $op b2;
+                        *c35 = a5 $op b3;
+                        *c36 = a5 $op b4;
+                        *c37 = a5 $op b5;
+                        *c38 = a5 $op b6;
+                        *c39 = a5 $op b7;
+                        *c40 = a5 $op b8;
+
+                        *c41 = a6 $op b1;
+                        *c42 = a6 $op b2;
+                        *c43 = a6 $op b3;
+                        *c44 = a6 $op b4;
+                        *c45 = a6 $op b5;
+                        *c46 = a6 $op b6;
+                        *c47 = a6 $op b7;
+                        *c48 = a6 $op b8;
+
+                        *c49 = a7 $op b1;
+                        *c50 = a7 $op b2;
+                        *c51 = a7 $op b3;
+                        *c52 = a7 $op b4;
+                        *c53 = a7 $op b5;
+                        *c54 = a7 $op b6;
+                        *c55 = a7 $op b7;
+                        *c56 = a7 $op b8;
+
+                        *c57 = a8 $op b1;
+                        *c58 = a8 $op b2;
+                        *c59 = a8 $op b3;
+                        *c60 = a8 $op b4;
+                        *c61 = a8 $op b5;
+                        *c62 = a8 $op b6;
+                        *c63 = a8 $op b7;
+                        *c64 = a8 $op b8;
                     }
                 }
 
-                let mut codomain_already_filled_count: usize = codomain_chunks_index * 16;
+                let mut codomain_already_filled_count: usize = codomain_chunks_index * 64;
 
                 if codomain_already_filled_count == LEN {
                     return codomain;
                 }
 
-                let (codomain_rest, _) = codomain[codomain_already_filled_count..].as_chunks_mut::<4>();
+                let (codomain_rest, _) = codomain[codomain_already_filled_count..].as_chunks_mut::<8>();
                 let mut codomain_rest_index: usize = 0;
 
                 let mut a_chunks_index: usize = 0;
 
                 while a_chunks_index < a_chunks_len {
                     let a_chunk = a_chunks[a_chunks_index]; a_chunks_index += 1;
-                    let [a1, a2, a3, a4] = a_chunk;
+                    let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunk;
 
                     let mut b_tail_index: usize = 0;
 
                     while b_tail_index < b_tail_len {
                         let b_tail_elem = b_tail[b_tail_index]; b_tail_index += 1;
-                        let [c1, c2, c3, c4] = &mut codomain_rest[codomain_rest_index]; codomain_rest_index += 1;
+                        let [c1, c2, c3, c4, c5, c6, c7, c8] = &mut codomain_rest[codomain_rest_index]; codomain_rest_index += 1;
 
                         *c1 = a1 $op b_tail_elem;
                         *c2 = a2 $op b_tail_elem;
                         *c3 = a3 $op b_tail_elem;
                         *c4 = a4 $op b_tail_elem;
+                        *c5 = a5 $op b_tail_elem;
+                        *c6 = a6 $op b_tail_elem;
+                        *c7 = a7 $op b_tail_elem;
+                        *c8 = a8 $op b_tail_elem;
                     }
                 }
 
@@ -222,17 +288,21 @@ macro_rules! impl_simple_binary_ops {
 
                     while b_chunks_index < b_chunks_len {
                         let b_chunk = b_chunks[b_chunks_index]; b_chunks_index += 1;
-                        let [b1, b2, b3, b4] = b_chunk;
-                        let [c1, c2, c3, c4] = &mut codomain_rest[codomain_rest_index]; codomain_rest_index += 1;
+                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunk;
+                        let [c1, c2, c3, c4, c5, c6, c7, c8] = &mut codomain_rest[codomain_rest_index]; codomain_rest_index += 1;
 
                         *c1 = a_tail_elem $op b1;
                         *c2 = a_tail_elem $op b2;
                         *c3 = a_tail_elem $op b3;
                         *c4 = a_tail_elem $op b4;
+                        *c5 = a_tail_elem $op b5;
+                        *c6 = a_tail_elem $op b6;
+                        *c7 = a_tail_elem $op b7;
+                        *c8 = a_tail_elem $op b8;
                     }
                 }
 
-                codomain_already_filled_count += codomain_rest_index * 4;
+                codomain_already_filled_count += codomain_rest_index * 8;
 
                 let codomain_rest = &mut codomain[codomain_already_filled_count..];
                 let mut codomain_rest_index: usize = 0;
