@@ -129,33 +129,34 @@ macro_rules! impl_simple_binary_ops {
         mod ${concat($inner_t,_,$trait_fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
-            use crate::set::LENGTH;
+            use crate::set::CARTESIAN_LENGTH;
 
-            // LEN is simpler than CARTESIAN<..>, makes a difference for bounds check costs.
-            const fn codomain<const A_LEN: usize, const B_LEN: usize>(
-                a_set: &[$inner_t; A_LEN],
-                b_set: &[$inner_t; B_LEN],
-            ) -> [[$inner_t; B_LEN]; A_LEN] {
-                let mut codomain = [[<$inner_t>::default(); B_LEN]; A_LEN];
+            #[expect(non_snake_case)]
+            const CODOMAIN<const __A: Set<$inner_t>, const __B: Set<$inner_t>>: Set<$inner_t> = &{
+                let A = __A;
+                let B = __B;
+
+                let a_len = A.len();
+                let b_len = B.len();
+
+                let mut codomain: [$inner_t; CARTESIAN_LENGTH::<$inner_t, $inner_t, __A, __B>] = [<$inner_t>::default(); _];
+                let mut codomain_index: usize = 0;
+
                 let mut a_index: usize = 0;
-                while a_index < A_LEN {
-                    let a = a_set[a_index];
-                    let row = &mut codomain[a_index];
+
+                while a_index < a_len {
+                    let a = A[a_index];
                     let mut b_index: usize = 0;
-                    while b_index < B_LEN {
-                        row[b_index] = a $op b_set[b_index];
+                    while b_index < b_len {
+                        let b = B[b_index];
+                        codomain[codomain_index] = a $op b;
                         b_index += 1;
+                        codomain_index += 1;
                     }
                     a_index += 1;
                 }
                 codomain
-            }
-
-            const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> =
-                codomain::<{ LENGTH::<$inner_t, A> }, { LENGTH::<$inner_t, B> }>(
-                    A.as_array().unwrap(),
-                    B.as_array().unwrap(),
-                ).as_flattened();
+            };
 
             const impl<const A: Set<$inner_t>, const B: Set<$inner_t>> $(::$op_trait)+<Sure<$inner_t, B> > for Sure<$inner_t, A> {
                 type Output = Sure<$inner_t, { CODOMAIN::<A, B> }>;
