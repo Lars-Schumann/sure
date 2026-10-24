@@ -133,7 +133,7 @@ macro_rules! impl_simple_binary_ops {
             use crate::set::CARTESIAN_LENGTH;
 
             #[doc(hidden)] // only pub for easier testing
-            pub const fn codomain<const LEN: usize>(a_set: Set<$inner_t>, b_set: Set<$inner_t>) -> [$inner_t; LEN] {
+            pub const fn codomain<const LEN: usize>(a_set: &[$inner_t], b_set: &[$inner_t]) -> [$inner_t; LEN] {
                 let mut codomain: [$inner_t; LEN] = [<$inner_t>::default(); _];
 
                 let (a_chunks, a_tail) = a_set.as_chunks::<8>();
