@@ -126,12 +126,14 @@ pub(crate) use impl_simple_unary_ops;
 macro_rules! impl_simple_binary_ops {
     ($([inner_t: $inner_t:ident, trait_fn_name: $trait_fn_name:ident, op_trait: $(::$op_trait:ident)+, op: $op:tt]),+ $(,)?) => {$(
 
-        mod ${concat($inner_t,_,$trait_fn_name)} {
+        #[doc(hidden)] // only pub for easier testing
+        pub mod ${concat($inner_t,_,$trait_fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
             use crate::set::CARTESIAN_LENGTH;
 
-            const fn codomain<const LEN: usize>(a_set: Set<$inner_t>, b_set: Set<$inner_t>) -> [$inner_t; LEN] {
+            #[doc(hidden)] // only pub for easier testing
+            pub const fn codomain<const LEN: usize>(a_set: Set<$inner_t>, b_set: Set<$inner_t>) -> [$inner_t; LEN] {
                 let mut codomain: [$inner_t; LEN] = [<$inner_t>::default(); _];
 
                 let (a_chunks, a_tail) = a_set.as_chunks::<8>();
