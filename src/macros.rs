@@ -293,26 +293,28 @@ pub(crate) use impl_unary_fns;
 macro_rules! impl_std_binary_fns {
     ($([fn $fn_name:ident($a_t:ident, $b_t:ident) -> $codomain_t:ty, fn_path: $fn_path:path]),+ $(,)?) => {$(
 
-        mod ${concat($a_t,_,$b_t,_,$fn_name)} {
+        #[doc(hidden)] // only pub for easier testing
+        pub mod ${concat($a_t,_,$b_t,_,$fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
             use crate::concat2;
             use crate::set::CARTESIAN_LENGTH;
 
-            const CODOMAIN<const A: Set<$a_t>, const B: Set<$b_t>>: Set<$codomain_t> = &{
-                let a_len = A.len();
-                let b_len = B.len();
+            #[doc(hidden)] // only pub for easier testing
+            pub const fn codomain<const LEN: usize>(a_set: &[$a_t], b_set: &[$b_t]) -> [$codomain_t; LEN] {
+                let a_len = a_set.len();
+                let b_len = b_set.len();
 
-                let mut codomain: [$codomain_t; CARTESIAN_LENGTH::<$a_t, $b_t, A, B>] = [<$codomain_t>::default(); _];
+                let mut codomain: [$codomain_t; LEN] = [<$codomain_t>::default(); _];
                 let mut codomain_index: usize = 0;
 
                 let mut a_index: usize = 0;
 
                 while a_index < a_len {
-                    let a = A[a_index];
+                    let a = a_set[a_index];
                     let mut b_index: usize = 0;
                     while b_index < b_len {
-                        let b = B[b_index];
+                        let b = b_set[b_index];
                         codomain[codomain_index] = $fn_path(a, b);
                         b_index += 1;
                         codomain_index += 1;
@@ -320,7 +322,9 @@ macro_rules! impl_std_binary_fns {
                     a_index += 1;
                 }
                 codomain
-            };
+            }
+
+            pub const CODOMAIN<const A: Set<$a_t>, const B: Set<$b_t>>: Set<$codomain_t> = &codomain::<{ CARTESIAN_LENGTH::<$a_t, $b_t, A, B> }>(A, B);
 
             impl<const A: Set<$a_t>> Sure<$a_t, A> {
                 #[doc = concat2!("This method is the equivalent of [`"{$a_t}"::"{$fn_name}"`].")]
