@@ -131,19 +131,11 @@ macro_rules! impl_simple_binary_ops {
             use crate::base::Sure;
             use crate::set::CARTESIAN_LENGTH;
 
-            #[expect(non_snake_case)]
-            const fn codomain<const __A: Set<$inner_t>, const __B: Set<$inner_t>, const LEN: usize>() -> [$inner_t; LEN] {
-                let A = __A;
-                let B = __B;
-
+            const fn codomain<const LEN: usize>(a_set: Set<$inner_t>, b_set: Set<$inner_t>) -> [$inner_t; LEN] {
                 let mut codomain: [$inner_t; LEN] = [<$inner_t>::default(); _];
 
-                if LEN == 0 {
-                    return codomain;
-                }
-
-                let (a_chunks, a_tail) = A.as_chunks::<8>();
-                let (b_chunks, b_tail) = B.as_chunks::<8>();
+                let (a_chunks, a_tail) = a_set.as_chunks::<8>();
+                let (b_chunks, b_tail) = b_set.as_chunks::<8>();
                 let (codomain_chunks, _) = codomain.as_chunks_mut::<64>();
 
                 let (a_chunks_len, a_tail_len) = (a_chunks.len(), a_tail.len());
@@ -246,7 +238,7 @@ macro_rules! impl_simple_binary_ops {
                 codomain
             }
 
-            const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = &codomain::<A, B, { CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>();
+            const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = &codomain::<{ CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(A, B);
 
             const impl<const A: Set<$inner_t>, const B: Set<$inner_t>> $(::$op_trait)+<Sure<$inner_t, B> > for Sure<$inner_t, A> {
                 type Output = Sure<$inner_t, { CODOMAIN::<A, B> }>;
