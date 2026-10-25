@@ -185,6 +185,7 @@ macro_rules! impl_simple_binary_ops {
 
                     while b_tail_index < b_tail_len {
                         let b_tail_elem = b_tail[b_tail_index]; b_tail_index += 1;
+
                         codomain_rest[codomain_rest_index] = [
                             a1 $op b_tail_elem,
                             a2 $op b_tail_elem,
@@ -199,14 +200,16 @@ macro_rules! impl_simple_binary_ops {
                     }
                 }
 
-                let mut a_tail_index: usize = 0;
+                let mut b_chunks_index: usize = 0;
 
-                while a_tail_index < a_tail_len {
-                    let a_tail_elem = a_tail[a_tail_index]; a_tail_index += 1;
-                    let mut b_chunks_index: usize = 0;
+                while b_chunks_index < b_chunks_len {
+                    let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index]; b_chunks_index += 1;
 
-                    while b_chunks_index < b_chunks_len {
-                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index]; b_chunks_index += 1;
+                    let mut a_tail_index: usize = 0;
+
+                    while a_tail_index < a_tail_len {
+                        let a_tail_elem = a_tail[a_tail_index]; a_tail_index += 1;
+
                         codomain_rest[codomain_rest_index] = [
                             a_tail_elem $op b1,
                             a_tail_elem $op b2,
