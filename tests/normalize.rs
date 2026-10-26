@@ -13,7 +13,7 @@ macro_rules! stuff {
     ($ty:ident, [$($len:literal),+]) => {
         $(
             #[test]
-            fn ${ concat($ty, "_", $len) }() {
+            fn ${ concat("normalize_",$ty, "_", $len) }() {
                 for _ in 0..100 {
                     let arr: [$ty; $len] = core::array::from_fn(|_i| fastrand::$ty(..));
                     assert_eq!(normalize(arr), std_normalized(arr));
