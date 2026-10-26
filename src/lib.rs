@@ -35,6 +35,7 @@
 extern crate alloc;
 
 mod const_helpers;
+pub(crate) mod for_macro;
 mod macros;
 mod radix_sort;
 mod spec;
