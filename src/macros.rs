@@ -176,17 +176,17 @@ macro_rules! impl_simple_binary_ops {
                         let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunks[a_chunks_index];
 
                         for_!(b_tail_index in 0..b_tail_len {
-                            let b_tail_elem = b_tail[b_tail_index];
+                            let b = b_tail[b_tail_index];
 
                             codomain_rest[codomain_rest_index] = [
-                                a1 $op b_tail_elem,
-                                a2 $op b_tail_elem,
-                                a3 $op b_tail_elem,
-                                a4 $op b_tail_elem,
-                                a5 $op b_tail_elem,
-                                a6 $op b_tail_elem,
-                                a7 $op b_tail_elem,
-                                a8 $op b_tail_elem,
+                                a1 $op b,
+                                a2 $op b,
+                                a3 $op b,
+                                a4 $op b,
+                                a5 $op b,
+                                a6 $op b,
+                                a7 $op b,
+                                a8 $op b,
                             ];
                             codomain_rest_index += 1;
                         });
@@ -202,17 +202,17 @@ macro_rules! impl_simple_binary_ops {
                         let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index];
 
                             for_!(a_tail_index in 0..a_tail_len {
-                            let a_tail_elem = a_tail[a_tail_index];
+                            let a = a_tail[a_tail_index];
 
                                 codomain_rest[codomain_rest_index] = [
-                                a_tail_elem $op b1,
-                                a_tail_elem $op b2,
-                                a_tail_elem $op b3,
-                                a_tail_elem $op b4,
-                                a_tail_elem $op b5,
-                                a_tail_elem $op b6,
-                                a_tail_elem $op b7,
-                                a_tail_elem $op b8,
+                                a $op b1,
+                                a $op b2,
+                                a $op b3,
+                                a $op b4,
+                                a $op b5,
+                                a $op b6,
+                                a $op b7,
+                                a $op b8,
                             ];
                             codomain_rest_index += 1;
                         });
@@ -225,11 +225,11 @@ macro_rules! impl_simple_binary_ops {
                     let mut codomain_rest_index: usize = 0;
 
                     for_!(a_tail_index in 0..a_tail_len {
-                        let a_tail_elem = a_tail[a_tail_index];
+                        let a = a_tail[a_tail_index];
 
                         for_!(b_tail_index in 0..b_tail_len {
-                            let b_tail_elem = b_tail[b_tail_index];
-                            codomain_rest[codomain_rest_index] = a_tail_elem $op b_tail_elem;
+                            let b = b_tail[b_tail_index];
+                            codomain_rest[codomain_rest_index] = a $op b;
                             codomain_rest_index += 1;
                         });
                     });
