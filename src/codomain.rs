@@ -13,6 +13,7 @@ macro_rules! codomain_fn {
         #[doc(hidden)] // only pub for easier testing
         pub const fn codomain<const LEN: usize>(a_set: &[$a_t], b_set: &[$b_t]) -> [$codomain_t; LEN] {
             use crate::codomain::f;
+            use crate::for_macro::for_;
 
             let mut codomain: [$codomain_t; LEN] = [<$codomain_t>::default(); _];
 

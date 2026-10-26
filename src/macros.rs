@@ -131,7 +131,6 @@ macro_rules! impl_simple_binary_ops {
             use crate::base::Set;
             use crate::base::Sure;
             use crate::codomain::codomain_fn;
-            use crate::for_macro::for_;
             use crate::set::CARTESIAN_LENGTH;
 
             codomain_fn!(a_t: $inner_t, b_t: $inner_t, codomain_t: $inner_t, op: {$op});
@@ -193,32 +192,11 @@ macro_rules! impl_std_binary_fns {
         pub mod ${concat($a_t,_,$b_t,_,$fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
+            use crate::codomain::codomain_fn;
             use crate::concat2;
             use crate::set::CARTESIAN_LENGTH;
 
-            #[doc(hidden)] // only pub for easier testing
-            pub const fn codomain<const LEN: usize>(a_set: &[$a_t], b_set: &[$b_t]) -> [$codomain_t; LEN] {
-                let a_len = a_set.len();
-                let b_len = b_set.len();
-
-                let mut codomain: [$codomain_t; LEN] = [<$codomain_t>::default(); _];
-                let mut codomain_index: usize = 0;
-
-                let mut a_index: usize = 0;
-
-                while a_index < a_len {
-                    let a = a_set[a_index];
-                    let mut b_index: usize = 0;
-                    while b_index < b_len {
-                        let b = b_set[b_index];
-                        codomain[codomain_index] = $fn_path(a, b);
-                        b_index += 1;
-                        codomain_index += 1;
-                    }
-                    a_index += 1;
-                }
-                codomain
-            }
+            codomain_fn!(a_t: $a_t, b_t: $b_t, codomain_t: $codomain_t, op: {$fn_path});
 
             pub const CODOMAIN<const A: Set<$a_t>, const B: Set<$b_t>>: Set<$codomain_t> = &codomain::<{ CARTESIAN_LENGTH::<$a_t, $b_t, A, B> }>(A, B);
 
