@@ -34,14 +34,14 @@
 //
 extern crate alloc;
 
+/// Defines the `Sure` type and its methods.
+mod base;
+pub(crate) mod codomain;
 mod const_helpers;
 pub(crate) mod for_macro;
 mod macros;
 mod radix_sort;
 mod spec;
-
-/// Defines the `Sure` type and its methods.
-mod base;
 
 /// Helpers for common set operations.
 pub mod set;

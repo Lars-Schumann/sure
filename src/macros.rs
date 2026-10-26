@@ -130,113 +130,11 @@ macro_rules! impl_simple_binary_ops {
         pub mod ${concat($inner_t,_,$trait_fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
+            use crate::codomain::codomain_fn;
             use crate::for_macro::for_;
             use crate::set::CARTESIAN_LENGTH;
 
-            #[doc(hidden)] // only pub for easier testing
-            pub const fn codomain<const LEN: usize>(a_set: &[$inner_t], b_set: &[$inner_t]) -> [$inner_t; LEN] {
-                let mut codomain: [$inner_t; LEN] = [<$inner_t>::default(); _];
-
-                let (a_chunks, a_tail) = a_set.as_chunks::<8>();
-                let (b_chunks, b_tail) = b_set.as_chunks::<8>();
-
-                let (a_chunks_len, a_tail_len) = (a_chunks.len(), a_tail.len());
-                let (b_chunks_len, b_tail_len) = (b_chunks.len(), b_tail.len());
-
-                if b_chunks_len > 0 {
-                    let (codomain_chunks, _tail) = codomain.as_chunks_mut::<64>();
-                    let mut codomain_chunks_index: usize = 0;
-
-                    for_!(a_chunks_index in 0..a_chunks_len {
-                        let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunks[a_chunks_index];
-                        for_!(b_chunks_index in 0..b_chunks_len {
-                            let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index];
-
-                            codomain_chunks[codomain_chunks_index] = [
-                                a1 $op b1, a1 $op b2, a1 $op b3, a1 $op b4, a1 $op b5, a1 $op b6, a1 $op b7, a1 $op b8,
-                                a2 $op b1, a2 $op b2, a2 $op b3, a2 $op b4, a2 $op b5, a2 $op b6, a2 $op b7, a2 $op b8,
-                                a3 $op b1, a3 $op b2, a3 $op b3, a3 $op b4, a3 $op b5, a3 $op b6, a3 $op b7, a3 $op b8,
-                                a4 $op b1, a4 $op b2, a4 $op b3, a4 $op b4, a4 $op b5, a4 $op b6, a4 $op b7, a4 $op b8,
-                                a5 $op b1, a5 $op b2, a5 $op b3, a5 $op b4, a5 $op b5, a5 $op b6, a5 $op b7, a5 $op b8,
-                                a6 $op b1, a6 $op b2, a6 $op b3, a6 $op b4, a6 $op b5, a6 $op b6, a6 $op b7, a6 $op b8,
-                                a7 $op b1, a7 $op b2, a7 $op b3, a7 $op b4, a7 $op b5, a7 $op b6, a7 $op b7, a7 $op b8,
-                                a8 $op b1, a8 $op b2, a8 $op b3, a8 $op b4, a8 $op b5, a8 $op b6, a8 $op b7, a8 $op b8,
-                            ];
-                            codomain_chunks_index += 1;
-                        });
-                    });
-                }
-
-                if b_tail_len > 0 {
-                    let codomain_filled_count: usize = (a_chunks_len * b_chunks_len * 64);
-                    let (codomain_rest, _tail) = codomain[codomain_filled_count..].as_chunks_mut::<8>();
-                    let mut codomain_rest_index: usize = 0;
-
-                    for_!(a_chunks_index in 0..a_chunks_len {
-                        let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunks[a_chunks_index];
-
-                        for_!(b_tail_index in 0..b_tail_len {
-                            let b = b_tail[b_tail_index];
-
-                            codomain_rest[codomain_rest_index] = [
-                                a1 $op b,
-                                a2 $op b,
-                                a3 $op b,
-                                a4 $op b,
-                                a5 $op b,
-                                a6 $op b,
-                                a7 $op b,
-                                a8 $op b,
-                            ];
-                            codomain_rest_index += 1;
-                        });
-                    });
-                }
-
-                if a_tail_len > 0 {
-                    let codomain_filled_count: usize = (a_chunks_len * b_chunks_len * 64) + (a_chunks_len * b_tail_len * 8);
-                    let (codomain_rest, _tail) = codomain[codomain_filled_count..].as_chunks_mut::<8>();
-                    let mut codomain_rest_index: usize = 0;
-
-                    for_!(b_chunks_index in 0..b_chunks_len {
-                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index];
-
-                            for_!(a_tail_index in 0..a_tail_len {
-                            let a = a_tail[a_tail_index];
-
-                                codomain_rest[codomain_rest_index] = [
-                                a $op b1,
-                                a $op b2,
-                                a $op b3,
-                                a $op b4,
-                                a $op b5,
-                                a $op b6,
-                                a $op b7,
-                                a $op b8,
-                            ];
-                            codomain_rest_index += 1;
-                        });
-                    });
-                }
-
-                if b_tail_len > 0 {
-                    let codomain_filled_count: usize = (a_chunks_len * b_chunks_len * 64) + (a_chunks_len * b_tail_len * 8) + (b_chunks_len * a_tail_len * 8);
-                    let codomain_rest = &mut codomain[codomain_filled_count..];
-                    let mut codomain_rest_index: usize = 0;
-
-                    for_!(a_tail_index in 0..a_tail_len {
-                        let a = a_tail[a_tail_index];
-
-                        for_!(b_tail_index in 0..b_tail_len {
-                            let b = b_tail[b_tail_index];
-                            codomain_rest[codomain_rest_index] = a $op b;
-                            codomain_rest_index += 1;
-                        });
-                    });
-                }
-
-                codomain
-            }
+            codomain_fn!(a_t: $inner_t, b_t: $inner_t, codomain_t: $inner_t, op: {$op});
 
             const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = &codomain::<{ CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(A, B);
 
