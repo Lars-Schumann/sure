@@ -1,8 +1,14 @@
 macro_rules! f {
-    ($fn_path:path, $a:expr, $b:expr) => {
+    ({$fn_path:path}, [$(($a:expr, $b:expr)),+ $(,)?]) => {
+        [$($fn_path($a, $b)),+]
+    };
+    ({$op:tt}, [$(($a:expr, $b:expr)),+ $(,)?]) => {
+        [$($a $op $b),+]
+    };
+    ({$fn_path:path}, $a:expr, $b:expr) => {
         $fn_path($a, $b)
     };
-    ($op:tt, $a:expr, $b:expr) => {
+    ({$op:tt}, $a:expr, $b:expr) => {
         $a $op $b
     };
 }
@@ -32,16 +38,16 @@ macro_rules! codomain_fn {
                     for_!(b_chunks_index in 0..b_chunks_len {
                         let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index];
 
-                        codomain_chunks[codomain_chunks_index] = [
-                            f!($op, a1, b1), f!($op, a1, b2), f!($op, a1, b3), f!($op, a1, b4), f!($op, a1, b5), f!($op, a1, b6), f!($op, a1, b7), f!($op, a1, b8),
-                            f!($op, a2, b1), f!($op, a2, b2), f!($op, a2, b3), f!($op, a2, b4), f!($op, a2, b5), f!($op, a2, b6), f!($op, a2, b7), f!($op, a2, b8),
-                            f!($op, a3, b1), f!($op, a3, b2), f!($op, a3, b3), f!($op, a3, b4), f!($op, a3, b5), f!($op, a3, b6), f!($op, a3, b7), f!($op, a3, b8),
-                            f!($op, a4, b1), f!($op, a4, b2), f!($op, a4, b3), f!($op, a4, b4), f!($op, a4, b5), f!($op, a4, b6), f!($op, a4, b7), f!($op, a4, b8),
-                            f!($op, a5, b1), f!($op, a5, b2), f!($op, a5, b3), f!($op, a5, b4), f!($op, a5, b5), f!($op, a5, b6), f!($op, a5, b7), f!($op, a5, b8),
-                            f!($op, a6, b1), f!($op, a6, b2), f!($op, a6, b3), f!($op, a6, b4), f!($op, a6, b5), f!($op, a6, b6), f!($op, a6, b7), f!($op, a6, b8),
-                            f!($op, a7, b1), f!($op, a7, b2), f!($op, a7, b3), f!($op, a7, b4), f!($op, a7, b5), f!($op, a7, b6), f!($op, a7, b7), f!($op, a7, b8),
-                            f!($op, a8, b1), f!($op, a8, b2), f!($op, a8, b3), f!($op, a8, b4), f!($op, a8, b5), f!($op, a8, b6), f!($op, a8, b7), f!($op, a8, b8),
-                        ];
+                        codomain_chunks[codomain_chunks_index] = f!({$op}, [
+                            (a1, b1), (a1, b2), (a1, b3), (a1, b4), (a1, b5), (a1, b6), (a1, b7), (a1, b8),
+                            (a2, b1), (a2, b2), (a2, b3), (a2, b4), (a2, b5), (a2, b6), (a2, b7), (a2, b8),
+                            (a3, b1), (a3, b2), (a3, b3), (a3, b4), (a3, b5), (a3, b6), (a3, b7), (a3, b8),
+                            (a4, b1), (a4, b2), (a4, b3), (a4, b4), (a4, b5), (a4, b6), (a4, b7), (a4, b8),
+                            (a5, b1), (a5, b2), (a5, b3), (a5, b4), (a5, b5), (a5, b6), (a5, b7), (a5, b8),
+                            (a6, b1), (a6, b2), (a6, b3), (a6, b4), (a6, b5), (a6, b6), (a6, b7), (a6, b8),
+                            (a7, b1), (a7, b2), (a7, b3), (a7, b4), (a7, b5), (a7, b6), (a7, b7), (a7, b8),
+                            (a8, b1), (a8, b2), (a8, b3), (a8, b4), (a8, b5), (a8, b6), (a8, b7), (a8, b8)
+                        ]);
                         codomain_chunks_index += 1;
                     });
                 });
@@ -58,16 +64,16 @@ macro_rules! codomain_fn {
                     for_!(b_tail_index in 0..b_tail_len {
                         let b = b_tail[b_tail_index];
 
-                        codomain_rest[codomain_rest_index] = [
-                            f!($op, a1, b),
-                            f!($op, a2, b),
-                            f!($op, a3, b),
-                            f!($op, a4, b),
-                            f!($op, a5, b),
-                            f!($op, a6, b),
-                            f!($op, a7, b),
-                            f!($op, a8, b),
-                        ];
+                        codomain_rest[codomain_rest_index] = f!({$op}, [
+                            (a1, b),
+                            (a2, b),
+                            (a3, b),
+                            (a4, b),
+                            (a5, b),
+                            (a6, b),
+                            (a7, b),
+                            (a8, b),
+                        ]);
                         codomain_rest_index += 1;
                     });
                 });
@@ -81,19 +87,19 @@ macro_rules! codomain_fn {
                 for_!(b_chunks_index in 0..b_chunks_len {
                     let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index];
 
-                        for_!(a_tail_index in 0..a_tail_len {
+                    for_!(a_tail_index in 0..a_tail_len {
                         let a = a_tail[a_tail_index];
 
-                        codomain_rest[codomain_rest_index] = [
-                            f!($op, a, b1),
-                            f!($op, a, b2),
-                            f!($op, a, b3),
-                            f!($op, a, b4),
-                            f!($op, a, b5),
-                            f!($op, a, b6),
-                            f!($op, a, b7),
-                            f!($op, a, b8),
-                        ];
+                        codomain_rest[codomain_rest_index] = f!({$op}, [
+                            (a, b1),
+                            (a, b2),
+                            (a, b3),
+                            (a, b4),
+                            (a, b5),
+                            (a, b6),
+                            (a, b7),
+                            (a, b8),
+                        ]);
                         codomain_rest_index += 1;
                     });
                 });
@@ -110,7 +116,7 @@ macro_rules! codomain_fn {
                     for_!(b_tail_index in 0..b_tail_len {
                         let b = b_tail[b_tail_index];
 
-                        codomain_rest[codomain_rest_index] = f!($op, a, b);
+                        codomain_rest[codomain_rest_index] = f!({$op}, a, b);
                         codomain_rest_index += 1;
                     });
                 });
