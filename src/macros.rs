@@ -132,7 +132,6 @@ macro_rules! impl_simple_binary_ops {
             use crate::base::Sure;
             use crate::set::CARTESIAN_LENGTH;
 
-            #[expect(clippy::too_many_lines)]
             #[doc(hidden)] // only pub for easier testing
             pub const fn codomain<const LEN: usize>(a_set: &[$inner_t], b_set: &[$inner_t]) -> [$inner_t; LEN] {
                 let mut codomain: [$inner_t; LEN] = [<$inner_t>::default(); _];
