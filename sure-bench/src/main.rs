@@ -52,6 +52,20 @@ macro_rules! bench_cartesian_product_x250 {
     )+};
 }
 
+macro_rules! bench_cartesian_product_square {
+    ($([count: $count:literal, feature: $feature:literal]),+ $(,)?) => {$(
+        #[cfg(feature = $feature)]
+        {
+            use sure::SureI32;
+            use sure::sure_i32::Range;
+
+            let a: SureI32![Range![1..=$count]] = Sure::new(2).unwrap();
+            let n: SureI32![Range![1..=$count]] = Sure::new(2).unwrap();
+            let b: SureI32<_> = a / n;
+        }
+    )+};
+}
+
 fn main() {
     #[allow(unused)]
     use sure::Sure;
@@ -368,6 +382,60 @@ fn main() {
         [ count: 85_000,  feature: "i32-cartesian-85_000x250" ],
         [ count: 90_000,  feature: "i32-cartesian-90_000x250" ],
         [ count: 95_000,  feature: "i32-cartesian-95_000x250" ],
+    );
+
+    bench_cartesian_product_square!(
+        [ count: 200,  feature: "i32-cartesian-200-square" ],
+        [ count: 201,  feature: "i32-cartesian-201-square" ],
+        [ count: 202,  feature: "i32-cartesian-202-square" ],
+        [ count: 203,  feature: "i32-cartesian-203-square" ],
+        [ count: 204,  feature: "i32-cartesian-204-square" ],
+        [ count: 205,  feature: "i32-cartesian-205-square" ],
+        [ count: 206,  feature: "i32-cartesian-206-square" ],
+        [ count: 207,  feature: "i32-cartesian-207-square" ],
+        [ count: 208,  feature: "i32-cartesian-208-square" ],
+        [ count: 209,  feature: "i32-cartesian-209-square" ],
+        [ count: 210,  feature: "i32-cartesian-210-square" ],
+        [ count: 211,  feature: "i32-cartesian-211-square" ],
+        [ count: 212,  feature: "i32-cartesian-212-square" ],
+        [ count: 213,  feature: "i32-cartesian-213-square" ],
+        [ count: 214,  feature: "i32-cartesian-214-square" ],
+        [ count: 215,  feature: "i32-cartesian-215-square" ],
+        [ count: 216,  feature: "i32-cartesian-216-square" ],
+        [ count: 217,  feature: "i32-cartesian-217-square" ],
+        [ count: 218,  feature: "i32-cartesian-218-square" ],
+        [ count: 219,  feature: "i32-cartesian-219-square" ],
+        [ count: 220,  feature: "i32-cartesian-220-square" ],
+        [ count: 221,  feature: "i32-cartesian-221-square" ],
+        [ count: 222,  feature: "i32-cartesian-222-square" ],
+        [ count: 223,  feature: "i32-cartesian-223-square" ],
+        [ count: 224,  feature: "i32-cartesian-224-square" ],
+        [ count: 225,  feature: "i32-cartesian-225-square" ],
+        [ count: 226,  feature: "i32-cartesian-226-square" ],
+        [ count: 227,  feature: "i32-cartesian-227-square" ],
+        [ count: 228,  feature: "i32-cartesian-228-square" ],
+        [ count: 229,  feature: "i32-cartesian-229-square" ],
+        [ count: 230,  feature: "i32-cartesian-230-square" ],
+        [ count: 231,  feature: "i32-cartesian-231-square" ],
+        [ count: 232,  feature: "i32-cartesian-232-square" ],
+        [ count: 233,  feature: "i32-cartesian-233-square" ],
+        [ count: 234,  feature: "i32-cartesian-234-square" ],
+        [ count: 235,  feature: "i32-cartesian-235-square" ],
+        [ count: 236,  feature: "i32-cartesian-236-square" ],
+        [ count: 237,  feature: "i32-cartesian-237-square" ],
+        [ count: 238,  feature: "i32-cartesian-238-square" ],
+        [ count: 239,  feature: "i32-cartesian-239-square" ],
+        [ count: 240,  feature: "i32-cartesian-240-square" ],
+        [ count: 241,  feature: "i32-cartesian-241-square" ],
+        [ count: 242,  feature: "i32-cartesian-242-square" ],
+        [ count: 243,  feature: "i32-cartesian-243-square" ],
+        [ count: 244,  feature: "i32-cartesian-244-square" ],
+        [ count: 245,  feature: "i32-cartesian-245-square" ],
+        [ count: 246,  feature: "i32-cartesian-246-square" ],
+        [ count: 247,  feature: "i32-cartesian-247-square" ],
+        [ count: 248,  feature: "i32-cartesian-248-square" ],
+        [ count: 249,  feature: "i32-cartesian-249-square" ],
+        [ count: 250,  feature: "i32-cartesian-250-square" ],
     );
 
     println!("bench done!");
