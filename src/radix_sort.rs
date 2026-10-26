@@ -126,8 +126,7 @@ macro_rules! radix_sort {
         }
     };
 }
-radix_sort!(radix_sort_u8, u8);
-radix_sort!(radix_sort_u16, u16);
+
 radix_sort!(radix_sort_u32, u32);
 radix_sort!(radix_sort_u64, u64);
 radix_sort!(radix_sort_u128, u128);
