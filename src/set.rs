@@ -112,10 +112,10 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
 
     macro_rules! specialize {
         ($($ty:ty => $sort_fn:ident),+ ) => {$(
-            match try_fn_once::<[T; LEN], [T; LEN], [$ty; LEN], [$ty; LEN]>(
+            match try_fn_once::<[T; LEN], Vec<T>, [$ty; LEN], Vec<$ty>>(
                 arr, sort::$sort_fn::<LEN>,
             ) {
-                Ok(sorted) => return deduped(&sorted).const_make_global(),
+                Ok(normalized) => return normalized.const_make_global(),
                 Err(_arr) => {},
             };
         )+};

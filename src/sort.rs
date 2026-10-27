@@ -1,133 +1,122 @@
-const fn bucket_bits(len: usize) -> u32 {
-    len.saturating_sub(1)
-        .bit_width()
-        .saturating_sub(1)
-        .clamp(1, 17)
-}
+use alloc::vec::Vec;
 
+const fn bucket_bits(len: usize) -> u32 {
+    len.saturating_sub(1).bit_width().clamp(1, 17)
+}
 const BUCKETS<const N: usize>: usize = const { 1 << bucket_bits(N) };
 
 macro_rules! sort {
     ($name:ident, $ty:ty) => {
         #[allow(
             clippy::cast_possible_truncation,
-            clippy::cast_possible_wrap,
             clippy::cast_sign_loss,
             clippy::manual_bit_width,
             clippy::too_many_lines
         )]
-        pub(crate) const fn $name<const N: usize>(array: [$ty; N]) -> [$ty; N] {
+        pub(crate) const fn $name<const N: usize>(a: [$ty; N]) -> Vec<$ty> {
             const fn sort<const N: usize>(
-                array: &[$ty; N],
+                a: &[$ty; N],
                 next: &mut [usize; N],
+                first: usize,
                 out: &mut [$ty; N],
                 mut dest: usize,
-                first: usize,
                 dense: bool,
             ) -> usize {
+                let v = a[first];
+                let mut diff = 0;
                 let mut len = 0;
-                let mut differences: $ty = 0;
-                let first_value = array[first];
                 if dense {
                     len = N;
-                    let mut i = 1;
+                    diff = v ^ a[N - 1];
                     let top = (1 as $ty) << (<$ty>::BITS - 1);
-                    differences = first_value ^ array[N - 1];
-                    while i < N && differences & top == 0 {
-                        differences |= first_value ^ array[i];
+                    let mut i = 1;
+                    while i < N && diff & top == 0 {
+                        diff |= v ^ a[i];
                         i += 1;
                     }
                 } else {
                     let mut i = first;
                     while i != N {
-                        differences |= first_value ^ array[i];
+                        diff |= v ^ a[i];
                         len += 1;
                         i = next[i];
                     }
                 }
-                let bits = <$ty>::BITS - differences.leading_zeros();
-                let digit_bits = bits.min(bucket_bits(len));
-                let shift = bits - digit_bits;
-                let buckets = 1usize << digit_bits;
-                let mask = buckets - 1;
-                let mut heads = [if shift == 0 { 0 } else { N }; BUCKETS::<N>];
-                if shift == 0 {
+                if diff == 0 {
+                    out[dest] = v;
+                    return dest + 1;
+                }
+                if len <= 8 {
+                    let start = dest;
                     let mut i = first;
                     while i != N {
-                        heads[(array[i] ^ <$ty>::MIN) as usize & mask] += 1;
-                        i = if dense { i + 1 } else { next[i] };
-                    }
-                    let prefix = (first_value ^ <$ty>::MIN) & !(mask as $ty);
-                    let mut b = 0;
-                    while b < buckets {
-                        let value = (prefix | b as $ty) ^ <$ty>::MIN;
-                        let end = dest + heads[b];
-                        while dest < end {
-                            out[dest] = value;
+                        let v = a[i];
+                        let mut j = start;
+                        while j < dest && out[j] < v {
+                            j += 1;
+                        }
+                        if j == dest || out[j] != v {
+                            let mut k = dest;
+                            while k > j {
+                                out[k] = out[k - 1];
+                                k -= 1;
+                            }
+                            out[j] = v;
                             dest += 1;
                         }
-                        b += 1;
+                        i = if dense { i + 1 } else { next[i] };
                     }
                     return dest;
                 }
-                let mut unsorted = [false; BUCKETS::<N>];
+                let bits = <$ty>::BITS - diff.leading_zeros();
+                let digit = bits.min(bucket_bits(len));
+                let shift = bits - digit;
+                let buckets = 1usize << digit;
+                let mask = buckets - 1;
+                let mut heads = [N; BUCKETS::<N>];
                 let mut i = first;
                 while i != N {
-                    let v = array[i];
                     let following = if dense { i + 1 } else { next[i] };
-                    let b = ((v ^ <$ty>::MIN) >> shift) as usize & mask;
-                    let head = heads[b];
-                    if head == N || v <= array[head] || unsorted[b] {
-                        next[i] = head;
-                        heads[b] = i;
-                    } else {
-                        let mut p = head;
-                        let mut j = next[p];
-                        let mut remaining = 8;
-                        while j != N && array[j] < v {
-                            if remaining == 0 {
-                                unsorted[b] = true;
-                                break;
-                            }
-                            p = j;
-                            j = next[p];
-                            remaining -= 1;
-                        }
-                        next[i] = j;
-                        next[p] = i;
-                    }
+                    let b = (((a[i] ^ <$ty>::MIN) >> shift) as usize) & mask;
+                    next[i] = heads[b];
+                    heads[b] = i;
                     i = following;
                 }
                 let mut b = 0;
                 while b < buckets {
-                    let mut j = heads[b];
-                    if unsorted[b] {
-                        dest = sort(array, next, out, dest, j, false);
-                    } else {
-                        while j != N {
-                            out[dest] = array[j];
+                    let head = heads[b];
+                    if head != N {
+                        if shift == 0 || next[head] == N {
+                            out[dest] = a[head];
                             dest += 1;
-                            j = next[j];
+                        } else {
+                            dest = sort(a, next, head, out, dest, false);
                         }
                     }
                     b += 1;
                 }
                 dest
             }
-            if N < 2 {
-                return array;
-            }
-            let mut i = 1;
-            while i < N && array[i - 1] <= array[i] {
+            let mut out = a;
+            let mut len = 0;
+            let mut i = 0;
+            while i < N && (i == 0 || a[i - 1] <= a[i]) {
+                if i == 0 || a[i - 1] != a[i] {
+                    out[len] = a[i];
+                    len += 1;
+                }
                 i += 1;
             }
-            if i == N {
-                return array;
+            if i != N {
+                len = sort(&a, &mut [N; N], 0, &mut out, 0, true);
             }
-            let mut next = [N; N];
-            let mut out = array;
-            sort(&array, &mut next, &mut out, 0, 0, true);
-            out
+            let mut result: Vec<$ty> = Vec::with_capacity(len);
+            // SAFETY: yes.
+            unsafe {
+                core::ptr::copy_nonoverlapping(out.as_ptr(), result.as_mut_ptr(), len);
+                result.set_len(len);
+            }
+            result
         }
     };
 }
