@@ -111,8 +111,6 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
         )+};
     }
     specialize! {
-        u8     => radix_sort_u8,
-        u16    => radix_sort_u16,
         u32    => radix_sort_u32,
         u64    => radix_sort_u64,
         u128   => radix_sort_u128,
