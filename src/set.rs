@@ -4,7 +4,7 @@ use core::marker::Destruct;
 
 use crate::base::Set;
 use crate::const_helpers as ch;
-use crate::sort;
+use crate::normalize;
 use crate::spec::try_fn_once;
 use crate::sure_eq::SureEq;
 
@@ -111,9 +111,9 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
     }
 
     macro_rules! specialize {
-        ($($ty:ty => $sort_fn:ident),+ ) => {$(
+        ($($ty:ty => $normalize_fn:ident),+ ) => {$(
             match try_fn_once::<[T; LEN], Vec<T>, [$ty; LEN], Vec<$ty>>(
-                arr, sort::$sort_fn::<LEN>,
+                arr, normalize::$normalize_fn::<LEN>,
             ) {
                 Ok(normalized) => return normalized.const_make_global(),
                 Err(_arr) => {},
@@ -121,14 +121,14 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
         )+};
     }
     specialize! {
-        u32    => sort_u32,
-        u64    => sort_u64,
-        u128   => sort_u128,
-        usize  => sort_usize,
-        i32    => sort_i32,
-        i64    => sort_i64,
-        i128   => sort_i128,
-        isize  => sort_isize
+        u32    => normalize_u32,
+        u64    => normalize_u64,
+        u128   => normalize_u128,
+        usize  => normalize_usize,
+        i32    => normalize_i32,
+        i64    => normalize_i64,
+        i128   => normalize_i128,
+        isize  => normalize_isize
     }
 
     let sorted = ch::sort(arr);

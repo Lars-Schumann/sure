@@ -40,7 +40,7 @@ pub(crate) mod codomain;
 mod const_helpers;
 pub(crate) mod for_macro;
 mod macros;
-mod sort;
+mod normalize;
 mod spec;
 
 /// Helpers for common set operations.
