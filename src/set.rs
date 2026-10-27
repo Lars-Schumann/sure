@@ -100,6 +100,16 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
         Err(_slice) => {}
     }
 
+    match try_fn_once::<[T; LEN], Vec<T>, [i8; LEN], Vec<i8>>(arr, normalize_i8) {
+        Ok(normalized) => return normalized.const_make_global(),
+        Err(_slice) => {}
+    }
+
+    match try_fn_once::<[T; LEN], Vec<T>, [i16; LEN], Vec<i16>>(arr, normalize_i16) {
+        Ok(normalized) => return normalized.const_make_global(),
+        Err(_slice) => {}
+    }
+
     macro_rules! specialize {
         ($($ty:ty => $sort_fn:ident),+ ) => {$(
             match try_fn_once::<[T; LEN], [T; LEN], [$ty; LEN], [$ty; LEN]>(
@@ -115,7 +125,6 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
         u64    => sort_u64,
         u128   => sort_u128,
         usize  => sort_usize,
-        i8     => sort_i8,
         i16    => sort_i16,
         i32    => sort_i32,
         i64    => sort_i64,
@@ -127,11 +136,11 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
     deduped(&sorted).const_make_global()
 }
 
-macro_rules! define_normalize_narrow_uint {
-    ($num_t:ty, $fn_name:ident) => {
+macro_rules! define_normalize_narrow {
+    ($uns_t:ty, $snd_t:ty, $uns_fn:ident, $snd_fn:ident) => {
         #[allow(clippy::large_stack_arrays)]
-        const fn $fn_name<const LEN: usize>(arr: [$num_t; LEN]) -> Vec<$num_t> {
-            const ELEMENT_COUNT: usize = (<$num_t>::MAX as usize) + 1;
+        const fn $uns_fn<const LEN: usize>(arr: [$uns_t; LEN]) -> Vec<$uns_t> {
+            const ELEMENT_COUNT: usize = (<$uns_t>::MAX as usize) + 1;
 
             let mut element_bitset: [bool; ELEMENT_COUNT] = [false; ELEMENT_COUNT];
 
@@ -141,11 +150,11 @@ macro_rules! define_normalize_narrow_uint {
                 i += 1;
             }
 
-            let mut normalized: Vec<$num_t> = Vec::with_capacity(ELEMENT_COUNT);
+            let mut normalized: Vec<$uns_t> = Vec::with_capacity(ELEMENT_COUNT);
 
-            let mut i: $num_t = 0;
+            let mut i: $uns_t = 0;
             let mut next_write_offset: usize = 0;
-            let normalized_start: *mut $num_t = normalized.as_mut_ptr();
+            let normalized_start: *mut $uns_t = normalized.as_mut_ptr();
             loop {
                 if element_bitset[i as usize] {
                     // SAFETY: TODO
@@ -153,7 +162,7 @@ macro_rules! define_normalize_narrow_uint {
                     next_write_offset += 1;
                 }
 
-                if i == <$num_t>::MAX {
+                if i == <$uns_t>::MAX {
                     break;
                 }
                 i += 1;
@@ -163,8 +172,34 @@ macro_rules! define_normalize_narrow_uint {
             unsafe { normalized.set_len(next_write_offset) }
             normalized
         }
+
+        #[allow(clippy::similar_names, clippy::undocumented_unsafe_blocks)]
+        const fn $snd_fn<const LEN: usize>(mut arr: [$snd_t; LEN]) -> Vec<$snd_t> {
+            // flip sign bit so it sorts the same way as the unsigned type
+            let mut i: usize = 0;
+            while i < LEN {
+                arr[i] ^= <$snd_t>::MIN;
+                i += 1;
+            }
+
+            let arr_uns: [$uns_t; LEN] = unsafe { core::intrinsics::transmute_unchecked(arr) };
+            let vec_uns: Vec<$uns_t> = $uns_fn(arr_uns);
+            // SAFETY: obviously unsound but urgh
+            let mut vec_snd: Vec<$snd_t> = unsafe { core::mem::transmute(vec_uns) };
+
+            // unflip sign bit
+            let vec_len = vec_snd.len();
+            let slice = vec_snd.as_mut_slice();
+            let mut i: usize = 0;
+            while i < vec_len {
+                slice[i] ^= <$snd_t>::MIN;
+                i += 1;
+            }
+
+            vec_snd
+        }
     };
 }
 
-define_normalize_narrow_uint!(u8, normalize_u8);
-define_normalize_narrow_uint!(u16, normalize_u16);
+define_normalize_narrow!(u8, i8, normalize_u8, normalize_i8);
+define_normalize_narrow!(u16, i16, normalize_u16, normalize_i16);

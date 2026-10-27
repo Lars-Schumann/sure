@@ -1,5 +1,5 @@
 //! Refinement types.
-
+#![feature(core_intrinsics)]
 #![feature(adt_const_params)]
 #![feature(const_binary_search)]
 #![feature(const_cmp)]
