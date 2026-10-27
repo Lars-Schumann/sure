@@ -136,8 +136,6 @@ sort!(sort_u32, u32);
 sort!(sort_u64, u64);
 sort!(sort_u128, u128);
 sort!(sort_usize, usize);
-sort!(sort_i8, i8);
-sort!(sort_i16, i16);
 sort!(sort_i32, i32);
 sort!(sort_i64, i64);
 sort!(sort_i128, i128);

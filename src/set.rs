@@ -125,7 +125,6 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
         u64    => sort_u64,
         u128   => sort_u128,
         usize  => sort_usize,
-        i16    => sort_i16,
         i32    => sort_i32,
         i64    => sort_i64,
         i128   => sort_i128,
