@@ -148,18 +148,21 @@ where
         // SAFETY: we pass the preconditions to the caller
         unsafe { Sure::new_unchecked(self.inner()) }
     }
+}
 
-    #[doc(hidden)]
-    pub const fn funky<
-        O: SureEq + Copy + const Ord + const Destruct,
-        F: const Fn(T) -> O + Copy + 'static + Send + Sync,
-    >(
-        self,
-        f: F,
-    ) -> Sure<O, { CODOMAIN::<T, O, SET, F> }> {
-        // SAFETY: trust me bro
-        unsafe { Sure::new_unchecked(f(self.inner())) }
-    }
+#[doc(hidden)]
+pub const fn f<
+    I: SureEq + Copy + const Ord + const Destruct,
+    const I_SET: Set<I>,
+    O: SureEq + Copy + const Ord + const Destruct,
+    F: const Fn(I) -> O + Copy + 'static + Send + Sync,
+>(
+    input: Sure<I, I_SET>,
+    f: F,
+) -> Sure<O, { CODOMAIN::<I, O, I_SET, F> }> {
+    const { assert!(core::mem::size_of::<F>() == 0) }
+    // SAFETY: trust me bro
+    unsafe { Sure::new_unchecked(f(input.inner())) }
 }
 
 const CODOMAIN<

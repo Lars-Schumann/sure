@@ -218,11 +218,13 @@ fn to_nonzero() {
 #[test]
 fn funky() {
     use sure::Sure;
-    use sure::SureI32;
+    use sure::f;
 
-    const fn uhu(_value: i32) -> i32 {
-        6
+    const fn plus_one(value: i32) -> i32 {
+        value + 1
     }
-    let x: SureI32![1, 2, 3] = Sure::new(1).unwrap();
-    let y: Sure<i32, { &[6] }> = x.funky(uhu).normalize();
+
+    let x: Sure<i32, { &[1, 2] }> = Sure::new(1).unwrap();
+    let y: Sure<i32, { &[2, 3] }> = f(x, plus_one);
+    assert_eq!(y.inner(), 2);
 }

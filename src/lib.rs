@@ -52,6 +52,7 @@ pub mod sure_eq;
 
 pub use base::Set;
 pub use base::Sure;
+pub use base::f;
 
 macros::impl_ints! {
     the_dolla: $,
