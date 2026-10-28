@@ -214,3 +214,15 @@ fn to_nonzero() {
     let set_not_zero: SureI32![1, 2, 3] = Sure::new(1).unwrap();
     let _real_non_zero: core::num::NonZeroI32 = set_not_zero.to_non_zero();
 }
+
+#[test]
+fn funky() {
+    use sure::Sure;
+    use sure::SureI32;
+
+    const fn uhu(_value: i32) -> i32 {
+        6
+    }
+    let x: SureI32![1, 2, 3] = Sure::new(1).unwrap();
+    let y: Sure<i32, { &[6] }> = x.funky(uhu).normalize();
+}

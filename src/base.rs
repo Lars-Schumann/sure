@@ -148,4 +148,43 @@ where
         // SAFETY: we pass the preconditions to the caller
         unsafe { Sure::new_unchecked(self.inner()) }
     }
+
+    #[doc(hidden)]
+    pub const fn funky<
+        O: SureEq + Copy + const Ord + const Destruct,
+        F: const Fn(T) -> O + Copy + 'static + Send + Sync,
+    >(
+        self,
+        f: F,
+    ) -> Sure<O, { CODOMAIN::<T, O, SET, F> }> {
+        // SAFETY: trust me bro
+        unsafe { Sure::new_unchecked(f(self.inner())) }
+    }
 }
+
+const CODOMAIN<
+    I: SureEq + Copy,
+    O: SureEq + Copy,
+    const INP: Set<I>,
+    F: const Fn(I) -> O + Copy + 'static + Send + Sync,
+>: Set<O> = {
+    use crate::set::LENGTH;
+    use core::mem::MaybeUninit;
+    use core::mem::conjure_zst;
+
+    // SAFETY: trust me bro
+    let f: F = unsafe { conjure_zst() };
+
+    let mut codomain: [MaybeUninit<O>; LENGTH::<I, INP>] = [MaybeUninit::uninit(); _];
+    let codomain_len: usize = codomain.len();
+
+    let mut i: usize = 0;
+
+    while i < codomain_len {
+        codomain[i] = MaybeUninit::new(f(INP[i]));
+        i += 1;
+    }
+
+    // SAFETY: trust me bro
+    &unsafe { MaybeUninit::array_assume_init(codomain) }
+};
