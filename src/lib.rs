@@ -39,6 +39,7 @@ extern crate alloc;
 mod base;
 pub(crate) mod codomain;
 mod const_helpers;
+mod f;
 pub(crate) mod for_macro;
 mod macros;
 mod normalize;
@@ -52,7 +53,8 @@ pub mod sure_eq;
 
 pub use base::Set;
 pub use base::Sure;
-pub use base::f;
+pub use f::f1;
+pub use f::f2;
 
 macros::impl_ints! {
     the_dolla: $,

@@ -216,15 +216,31 @@ fn to_nonzero() {
 }
 
 #[test]
-fn funky() {
+fn f1() {
     use sure::Sure;
-    use sure::f;
+    use sure::f1;
 
     const fn plus_one(value: i32) -> i32 {
         value + 1
     }
 
     let x: Sure<i32, { &[1, 2] }> = Sure::new(1).unwrap();
-    let y: Sure<i32, { &[2, 3] }> = f(x, plus_one);
+    let y: Sure<i32, { &[2, 3] }> = f1(x, plus_one);
     assert_eq!(y.inner(), 2);
+}
+
+#[test]
+fn f2() {
+    use sure::Sure;
+    use sure::f2;
+
+    const fn add_then_plus_one(a: i32, b: i32) -> i32 {
+        a + b + 1
+    }
+
+    let x: Sure<i32, { &[1, 2] }> = Sure::new(1).unwrap();
+    let y: Sure<i32, { &[4] }> = Sure::new(4).unwrap();
+
+    let z: Sure<i32, { &[6, 7] }> = f2(x, y, add_then_plus_one);
+    assert_eq!(z.inner(), 6);
 }
