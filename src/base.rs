@@ -150,7 +150,10 @@ where
     }
 }
 
-#[doc(hidden)]
+/// # Safety
+///
+/// This function is safe, because it relies on the purity of const functions and the fact that const functions are not allowed to detect whether they are running in const or not.
+/// Any usage of unstable features to circumvent either of these are considered to be not my problem.  
 pub const fn f<
     I: SureEq + Copy + const Ord + const Destruct,
     const I_SET: Set<I>,
