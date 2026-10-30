@@ -217,30 +217,41 @@ fn to_nonzero() {
 
 #[test]
 fn f1() {
+    use sure::FnExt1;
     use sure::Sure;
+    use sure::SureI32;
     use sure::f1;
 
     const fn plus_one(value: i32) -> i32 {
         value + 1
     }
 
-    let x: Sure<i32, { &[1, 2] }> = Sure::new(1).unwrap();
-    let y: Sure<i32, { &[2, 3] }> = f1(x, plus_one);
+    let a: SureI32![1, 2] = Sure::new(1).unwrap();
+
+    let x: SureI32![2, 3] = f1(a, plus_one);
+    let y: SureI32![2, 3] = plus_one.f(a);
+
+    assert_eq!(x.inner(), 2);
     assert_eq!(y.inner(), 2);
 }
 
 #[test]
 fn f2() {
+    use sure::FnExt2;
     use sure::Sure;
+    use sure::SureI32;
     use sure::f2;
 
-    const fn add_then_plus_one(a: i32, b: i32) -> i32 {
-        a + b + 1
+    const fn add_twice(a: i32, b: i32) -> i32 {
+        a + b + b
     }
 
-    let x: Sure<i32, { &[1, 2] }> = Sure::new(1).unwrap();
-    let y: Sure<i32, { &[4] }> = Sure::new(4).unwrap();
+    let a: sure::Sure<i32, { &[1, 2] }> = Sure::new(1).unwrap();
+    let b: SureI32![4] = Sure::new(4).unwrap();
 
-    let z: Sure<i32, { &[6, 7] }> = f2(x, y, add_then_plus_one);
-    assert_eq!(z.inner(), 6);
+    let x: SureI32![9, 10] = f2(a, b, add_twice);
+    let y: SureI32![9, 10] = add_twice.f(a, b);
+
+    assert_eq!(x.inner(), 9);
+    assert_eq!(y.inner(), 9);
 }

@@ -53,6 +53,8 @@ pub mod sure_eq;
 
 pub use base::Set;
 pub use base::Sure;
+pub use f::FnExt1;
+pub use f::FnExt2;
 pub use f::f1;
 pub use f::f2;
 

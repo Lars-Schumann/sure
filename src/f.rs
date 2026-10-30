@@ -104,3 +104,73 @@ pub const fn f2<
     // SAFETY: trust me bro
     unsafe { Sure::new_unchecked(f(input1.inner(), input2.inner())) }
 }
+
+/// Enables method syntax for the [`f1`] function.
+pub trait FnExt1<
+    I: SureEq + const Ord + Copy + const Destruct,
+    const I_SET: Set<I>,
+    O: SureEq + const Ord + Copy + const Destruct,
+>
+{
+    /// Equivalent to [`f1`].
+    fn f(self, input: Sure<I, I_SET>) -> Sure<O, { CODOMAIN1::<I, O, I_SET, Self> }>
+    where
+        Self: const Fn(I) -> O + Copy + Send + Sync + 'static;
+}
+
+impl<
+    I: SureEq + const Ord + Copy + const Destruct,
+    const I_SET: Set<I>,
+    O: SureEq + const Ord + Copy + const Destruct,
+    F: const Fn(I) -> O + Copy + Send + Sync + 'static,
+> FnExt1<I, I_SET, O> for F
+{
+    fn f(self, input: Sure<I, I_SET>) -> Sure<O, { CODOMAIN1::<I, O, I_SET, Self> }>
+    where
+        Self: const Fn(I) -> O + Copy + Send + Sync + 'static,
+    {
+        // SAFETY: trust me bro.
+        unsafe { Sure::new_unchecked(self(input.inner())) }
+    }
+}
+
+/// Enables method syntax for the [`f2`] function.
+pub trait FnExt2<
+    I1: SureEq + const Ord + Copy + const Destruct,
+    I2: SureEq + const Ord + Copy + const Destruct,
+    const INP1: Set<I1>,
+    const INP2: Set<I2>,
+    O: SureEq + const Ord + Copy + const Destruct,
+>
+{
+    /// Equivalent to [`f2`].
+    fn f(
+        self,
+        input1: Sure<I1, INP1>,
+        input2: Sure<I2, INP2>,
+    ) -> Sure<O, { CODOMAIN2::<I1, I2, O, INP1, INP2, Self> }>
+    where
+        Self: const Fn(I1, I2) -> O + Copy + Send + Sync + 'static;
+}
+
+impl<
+    I1: SureEq + const Ord + Copy + const Destruct,
+    I2: SureEq + const Ord + Copy + const Destruct,
+    const INP1: Set<I1>,
+    const INP2: Set<I2>,
+    O: SureEq + const Ord + Copy + const Destruct,
+    F: const Fn(I1, I2) -> O + Copy + Send + Sync + 'static,
+> FnExt2<I1, I2, INP1, INP2, O> for F
+{
+    fn f(
+        self,
+        input1: Sure<I1, INP1>,
+        input2: Sure<I2, INP2>,
+    ) -> Sure<O, { CODOMAIN2::<I1, I2, O, INP1, INP2, Self> }>
+    where
+        Self: const Fn(I1, I2) -> O + Copy + Send + Sync + 'static,
+    {
+        // SAFETY: trust me bro.
+        unsafe { Sure::new_unchecked(self(input1.inner(), input2.inner())) }
+    }
+}
