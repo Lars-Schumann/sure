@@ -34,9 +34,11 @@ macro_rules! codomain_fn {
                 let mut codomain_chunks_index: usize = 0;
 
                 for_!(a_chunks_index in 0..a_chunks_len {
-                    let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunks[a_chunks_index];
+                    let a_chunk = a_chunks[a_chunks_index];
+                    let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunk;
                     for_!(b_chunks_index in 0..b_chunks_len {
-                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index];
+                        let b_chunk = b_chunks[b_chunks_index];
+                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunk;
 
                         codomain_chunks[codomain_chunks_index] = f!({$op}, [
                             (a1, b1), (a1, b2), (a1, b3), (a1, b4), (a1, b5), (a1, b6), (a1, b7), (a1, b8),
@@ -62,7 +64,8 @@ macro_rules! codomain_fn {
                     let b = b_tail[b_tail_index];
 
                     for_!(a_chunks_index in 0..a_chunks_len {
-                        let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunks[a_chunks_index];
+                        let a_chunk = a_chunks[a_chunks_index];
+                        let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunk;
 
                         codomain_rest[codomain_rest_index] = f!({$op}, [
                             (a1, b),
@@ -88,7 +91,8 @@ macro_rules! codomain_fn {
                     let a = a_tail[a_tail_index];
 
                     for_!(b_chunks_index in 0..b_chunks_len {
-                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunks[b_chunks_index];
+                        let b_chunk = b_chunks[b_chunks_index];
+                        let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunk;
 
                         codomain_rest[codomain_rest_index] = f!({$op}, [
                             (a, b1),
