@@ -1,5 +1,6 @@
 use crate::base::Set;
 use crate::base::Sure;
+use crate::pure::Pure;
 use crate::sure_eq::SureEq;
 use core::marker::Destruct;
 
@@ -77,11 +78,11 @@ pub const fn f1<
     F: const Fn(I) -> O + Copy + Send + Sync + 'static,
 >(
     input: Sure<I, I_SET>,
-    f: AssertPure<F>,
+    f: Pure<F>,
 ) -> Sure<O, { CODOMAIN1::<I, O, I_SET, F> }> {
     const { assert!(core::mem::size_of::<F>() == 0) }
     // SAFETY: trust me bro
-    unsafe { Sure::new_unchecked((f.inner)(input.inner())) }
+    unsafe { Sure::new_unchecked(f.inner()(input.inner())) }
 }
 
 /// # Safety
@@ -98,11 +99,11 @@ pub const fn f2<
 >(
     input1: Sure<I1, INP1>,
     input2: Sure<I2, INP2>,
-    f: AssertPure<F>,
+    f: Pure<F>,
 ) -> Sure<O, { CODOMAIN2::<I1, I2, O, INP1, INP2, F> }> {
     const { assert!(core::mem::size_of::<F>() == 0) }
     // SAFETY: trust me bro
-    unsafe { Sure::new_unchecked((f.inner)(input1.inner(), input2.inner())) }
+    unsafe { Sure::new_unchecked(f.inner()(input1.inner(), input2.inner())) }
 }
 
 /// Enables method syntax for the [`f1`] function.
@@ -124,11 +125,11 @@ impl<
     const I_SET: Set<I>,
     O: SureEq + const Ord + Copy + const Destruct,
     F: const Fn(I) -> O + Copy + Send + Sync + 'static,
-> FnExt1<I, I_SET, O, F> for AssertPure<F>
+> FnExt1<I, I_SET, O, F> for Pure<F>
 {
     fn f(self, input: Sure<I, I_SET>) -> Sure<O, { CODOMAIN1::<I, O, I_SET, F> }> {
         // SAFETY: trust me bro.
-        unsafe { Sure::new_unchecked((self.inner)(input.inner())) }
+        unsafe { Sure::new_unchecked(self.inner()(input.inner())) }
     }
 }
 
@@ -157,7 +158,7 @@ impl<
     const INP2: Set<I2>,
     O: SureEq + const Ord + Copy + const Destruct,
     F: const Fn(I1, I2) -> O + Copy + Send + Sync + 'static,
-> FnExt2<I1, I2, INP1, INP2, O, F> for AssertPure<F>
+> FnExt2<I1, I2, INP1, INP2, O, F> for Pure<F>
 {
     fn f(
         self,
@@ -168,21 +169,6 @@ impl<
         F: const Fn(I1, I2) -> O + Copy + Send + Sync + 'static,
     {
         // SAFETY: trust me bro.
-        unsafe { Sure::new_unchecked((self.inner)(input1.inner(), input2.inner())) }
-    }
-}
-
-/// Wraps a pure function.
-#[derive(Clone, Copy)]
-pub struct AssertPure<F> {
-    inner: F,
-}
-
-impl<F> AssertPure<F> {
-    /// # Safety
-    ///
-    /// `f` must be pure (for some definition of yet to be defined purity).
-    pub const unsafe fn new(f: F) -> Self {
-        Self { inner: f }
+        unsafe { Sure::new_unchecked(self.inner()(input1.inner(), input2.inner())) }
     }
 }

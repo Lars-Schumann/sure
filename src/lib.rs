@@ -43,6 +43,8 @@ mod f;
 pub(crate) mod for_macro;
 mod macros;
 mod normalize;
+/// TODO(doc)
+pub mod pure;
 mod spec;
 
 /// Helpers for common set operations.
@@ -57,7 +59,6 @@ pub use f::FnExt1;
 pub use f::FnExt2;
 pub use f::f1;
 pub use f::f2;
-pub use f::AssertPure;
 
 macros::impl_ints! {
     the_dolla: $,
