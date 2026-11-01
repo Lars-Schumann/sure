@@ -57,6 +57,7 @@ pub use f::FnExt1;
 pub use f::FnExt2;
 pub use f::f1;
 pub use f::f2;
+pub use f::AssertPure;
 
 macros::impl_ints! {
     the_dolla: $,
