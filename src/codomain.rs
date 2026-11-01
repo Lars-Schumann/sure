@@ -29,7 +29,7 @@ macro_rules! codomain_fn {
             let (a_chunks_len, a_tail_len) = (a_chunks.len(), a_tail.len());
             let (b_chunks_len, b_tail_len) = (b_chunks.len(), b_tail.len());
 
-            if b_chunks_len > 0 {
+            if a_chunks_len > 0 && b_chunks_len > 0 {
                 let (codomain_chunks, _tail) = codomain.as_chunks_mut::<64>();
                 let mut codomain_chunks_index: usize = 0;
 
@@ -55,7 +55,7 @@ macro_rules! codomain_fn {
                 });
             }
 
-            if b_tail_len > 0 {
+            if b_tail_len > 0 && a_chunks_len > 0 {
                 let codomain_filled_count: usize = (a_chunks_len * b_chunks_len * 64);
                 let (codomain_rest, _tail) = codomain[codomain_filled_count..].as_chunks_mut::<8>();
                 let mut codomain_rest_index: usize = 0;
@@ -82,7 +82,7 @@ macro_rules! codomain_fn {
                 });
             }
 
-            if a_tail_len > 0 {
+            if a_tail_len > 0 && b_chunks_len > 0 {
                 let codomain_filled_count: usize = (a_chunks_len * b_chunks_len * 64) + (a_chunks_len * b_tail_len * 8);
                 let (codomain_rest, _tail) = codomain[codomain_filled_count..].as_chunks_mut::<8>();
                 let mut codomain_rest_index: usize = 0;
@@ -109,7 +109,7 @@ macro_rules! codomain_fn {
                 });
             }
 
-            if b_tail_len > 0 {
+            if a_tail_len > 0 && b_tail_len > 0 {
                 let codomain_filled_count: usize = (a_chunks_len * b_chunks_len * 64) + (a_chunks_len * b_tail_len * 8) + (b_chunks_len * a_tail_len * 8);
                 let codomain_rest = &mut codomain[codomain_filled_count..];
                 let mut codomain_rest_index: usize = 0;
