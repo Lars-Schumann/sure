@@ -225,7 +225,7 @@ fn f1() {
         value + 1
     }
 
-    let plus_one = unsafe { Pure::new(plus_one) };
+    let plus_one = unsafe { Pure::new_unchecked(plus_one) };
 
     let a: SureI32![1, 2] = Sure::new(1).unwrap();
 
@@ -244,7 +244,7 @@ fn f2() {
     const fn add_twice(a: i32, b: i32) -> i32 {
         a + b + b
     }
-    let add_twice_pure = unsafe { Pure::new(add_twice) };
+    let add_twice_pure = unsafe { Pure::new_unchecked(add_twice) };
 
     let a: sure::Sure<i32, { &[1, 2] }> = Sure::new(1).unwrap();
     let b: SureI32![4] = Sure::new(4).unwrap();

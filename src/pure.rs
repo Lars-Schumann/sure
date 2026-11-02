@@ -14,7 +14,7 @@ impl<F: Copy + Send + Sync + 'static> Pure<F> {
     /// # Safety
     ///
     /// `f` must be pure (for some definition of yet to be defined purity).
-    pub const unsafe fn new(f: F) -> Self {
+    pub const unsafe fn new_unchecked(f: F) -> Self {
         const { assert!(core::mem::size_of::<F>() == 0) }
         Self { inner: f }
     }
@@ -71,7 +71,7 @@ pub trait AssumePure: Sized {
 impl<F: Copy + Send + Sync + 'static> AssumePure for F {
     unsafe fn assume_pure(self) -> Pure<Self> {
         // SAFETY: The safety requirements are passed to the caller.
-        unsafe { Pure::new(self) }
+        unsafe { Pure::new_unchecked(self) }
     }
 }
 
