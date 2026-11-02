@@ -21,3 +21,6 @@ seq-macro = "0.3"
 
 [workspace]
 members = ["sure-bench", "sure-run-bench"]
+
+[profile.test]
+opt-level = 1
