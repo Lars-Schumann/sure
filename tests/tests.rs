@@ -246,7 +246,7 @@ fn f2() {
     }
     let add_twice_pure = unsafe { Pure::new_unchecked(add_twice) };
 
-    let a: sure::Sure<i32, { &[1, 2] }> = Sure::new(1).unwrap();
+    let a: SureI32![1, 2] = Sure::new(1).unwrap();
     let b: SureI32![4] = Sure::new(4).unwrap();
 
     let x: SureI32![9, 10] = add_twice_pure.call2(a, b);
