@@ -32,7 +32,7 @@ impl<F: Copy + Send + Sync + 'static> Pure<F> {
     >(
         self,
         a: Sure<A, A_SET>,
-    ) -> Sure<OUTPUT, { CODOMAIN1::<A, A_SET, OUTPUT, F> }>
+    ) -> Sure<OUTPUT, { IMAGE1::<A, A_SET, OUTPUT, F> }>
     where
         F: const Fn(A) -> OUTPUT + Copy + Send + Sync + 'static,
     {
@@ -51,7 +51,7 @@ impl<F: Copy + Send + Sync + 'static> Pure<F> {
         self,
         a: Sure<A, A_SET>,
         b: Sure<B, B_SET>,
-    ) -> Sure<OUTPUT, { CODOMAIN2::<A, B, A_SET, B_SET, OUTPUT, F> }>
+    ) -> Sure<OUTPUT, { IMAGE2::<A, B, A_SET, B_SET, OUTPUT, F> }>
     where
         F: const Fn(A, B) -> OUTPUT + Copy + Send + Sync + 'static,
     {
@@ -75,7 +75,7 @@ impl<F: Copy + Send + Sync + 'static> AssumePure for F {
     }
 }
 
-const CODOMAIN1<
+const IMAGE1<
     A: SureEq + Copy,
     const A_SET: Set<A>,
     OUTPUT: SureEq + Copy,
@@ -90,21 +90,21 @@ const CODOMAIN1<
     // SAFETY: trust me bro
     let f: F = unsafe { conjure_zst() };
 
-    let mut codomain: [MaybeUninit<OUTPUT>; LENGTH::<A, A_SET>] = [MaybeUninit::uninit(); _];
-    let codomain_len: usize = codomain.len();
+    let mut image: [MaybeUninit<OUTPUT>; LENGTH::<A, A_SET>] = [MaybeUninit::uninit(); _];
+    let image_len: usize = image.len();
 
     let mut i: usize = 0;
 
-    while i < codomain_len {
-        codomain[i] = MaybeUninit::new(f(A_SET[i]));
+    while i < image_len {
+        image[i] = MaybeUninit::new(f(A_SET[i]));
         i += 1;
     }
 
     // SAFETY: trust me bro
-    &unsafe { MaybeUninit::array_assume_init(codomain) }
+    &unsafe { MaybeUninit::array_assume_init(image) }
 };
 
-const CODOMAIN2<
+const IMAGE2<
     A: SureEq + Copy,
     B: SureEq + Copy,
     const A_SET: Set<A>,
@@ -123,17 +123,17 @@ const CODOMAIN2<
 
     let b_len = B_SET.len();
 
-    let mut codomain: [MaybeUninit<OUTPUT>; CARTESIAN_LENGTH::<A, B, A_SET, B_SET>] =
+    let mut image: [MaybeUninit<OUTPUT>; CARTESIAN_LENGTH::<A, B, A_SET, B_SET>] =
         [MaybeUninit::uninit(); _];
-    let codomain_len: usize = codomain.len();
+    let image_len: usize = image.len();
 
     let mut i: usize = 0;
 
-    while i < codomain_len {
-        codomain[i] = MaybeUninit::new(f(A_SET[i / b_len], B_SET[i % b_len]));
+    while i < image_len {
+        image[i] = MaybeUninit::new(f(A_SET[i / b_len], B_SET[i % b_len]));
         i += 1;
     }
 
     // SAFETY: trust me bro
-    &unsafe { MaybeUninit::array_assume_init(codomain) }
+    &unsafe { MaybeUninit::array_assume_init(image) }
 };

@@ -14,14 +14,14 @@ macro_rules! f {
 }
 pub(crate) use f;
 
-macro_rules! codomain_fn {
+macro_rules! image_fn {
     (a_t: $a_t:ty, b_t: $b_t:ty, codomain_t: $codomain_t:ty, op: {$op:tt}) => {
         #[doc(hidden)] // only pub for easier testing
-        pub const fn codomain<const LEN: usize>(a_set: &[$a_t], b_set: &[$b_t]) -> [$codomain_t; LEN] {
-            use crate::codomain::f;
+        pub const fn image<const LEN: usize>(a_set: &[$a_t], b_set: &[$b_t]) -> [$codomain_t; LEN] {
+            use crate::image::f;
             use crate::for_macro::for_;
 
-            let mut codomain: [$codomain_t; LEN] = [<$codomain_t>::default(); _];
+            let mut image: [$codomain_t; LEN] = [<$codomain_t>::default(); _];
 
             let (a_chunks, a_tail) = a_set.as_chunks::<8>();
             let (b_chunks, b_tail) = b_set.as_chunks::<8>();
@@ -30,8 +30,8 @@ macro_rules! codomain_fn {
             let (b_chunks_len, b_tail_len) = (b_chunks.len(), b_tail.len());
 
             if a_chunks_len > 0 && b_chunks_len > 0 {
-                let (codomain_chunks, _tail) = codomain.as_chunks_mut::<64>();
-                let mut codomain_chunks_index: usize = 0;
+                let (image_chunks, _tail) = image.as_chunks_mut::<64>();
+                let mut image_chunks_index: usize = 0;
 
                 for_!(a_chunks_index in 0..a_chunks_len {
                     let a_chunk = a_chunks[a_chunks_index];
@@ -40,7 +40,7 @@ macro_rules! codomain_fn {
                         let b_chunk = b_chunks[b_chunks_index];
                         let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunk;
 
-                        codomain_chunks[codomain_chunks_index] = f!({$op}, [
+                        image_chunks[image_chunks_index] = f!({$op}, [
                             (a1, b1), (a1, b2), (a1, b3), (a1, b4), (a1, b5), (a1, b6), (a1, b7), (a1, b8),
                             (a2, b1), (a2, b2), (a2, b3), (a2, b4), (a2, b5), (a2, b6), (a2, b7), (a2, b8),
                             (a3, b1), (a3, b2), (a3, b3), (a3, b4), (a3, b5), (a3, b6), (a3, b7), (a3, b8),
@@ -50,15 +50,15 @@ macro_rules! codomain_fn {
                             (a7, b1), (a7, b2), (a7, b3), (a7, b4), (a7, b5), (a7, b6), (a7, b7), (a7, b8),
                             (a8, b1), (a8, b2), (a8, b3), (a8, b4), (a8, b5), (a8, b6), (a8, b7), (a8, b8)
                         ]);
-                        codomain_chunks_index += 1;
+                        image_chunks_index += 1;
                     });
                 });
             }
 
             if b_tail_len > 0 && a_chunks_len > 0 {
-                let codomain_filled_count: usize = (a_chunks_len * b_chunks_len * 64);
-                let (codomain_rest, _tail) = codomain[codomain_filled_count..].as_chunks_mut::<8>();
-                let mut codomain_rest_index: usize = 0;
+                let image_filled_count: usize = (a_chunks_len * b_chunks_len * 64);
+                let (image_rest, _tail) = image[image_filled_count..].as_chunks_mut::<8>();
+                let mut image_rest_index: usize = 0;
 
                 for_!(b_tail_index in 0..b_tail_len {
                     let b = b_tail[b_tail_index];
@@ -67,7 +67,7 @@ macro_rules! codomain_fn {
                         let a_chunk = a_chunks[a_chunks_index];
                         let [a1, a2, a3, a4, a5, a6, a7, a8] = a_chunk;
 
-                        codomain_rest[codomain_rest_index] = f!({$op}, [
+                        image_rest[image_rest_index] = f!({$op}, [
                             (a1, b),
                             (a2, b),
                             (a3, b),
@@ -77,15 +77,15 @@ macro_rules! codomain_fn {
                             (a7, b),
                             (a8, b),
                         ]);
-                        codomain_rest_index += 1;
+                        image_rest_index += 1;
                     });
                 });
             }
 
             if a_tail_len > 0 && b_chunks_len > 0 {
-                let codomain_filled_count: usize = (a_chunks_len * b_chunks_len * 64) + (a_chunks_len * b_tail_len * 8);
-                let (codomain_rest, _tail) = codomain[codomain_filled_count..].as_chunks_mut::<8>();
-                let mut codomain_rest_index: usize = 0;
+                let image_filled_count: usize = (a_chunks_len * b_chunks_len * 64) + (a_chunks_len * b_tail_len * 8);
+                let (image_rest, _tail) = image[image_filled_count..].as_chunks_mut::<8>();
+                let mut image_rest_index: usize = 0;
 
                 for_!(a_tail_index in 0..a_tail_len {
                     let a = a_tail[a_tail_index];
@@ -94,7 +94,7 @@ macro_rules! codomain_fn {
                         let b_chunk = b_chunks[b_chunks_index];
                         let [b1, b2, b3, b4, b5, b6, b7, b8] = b_chunk;
 
-                        codomain_rest[codomain_rest_index] = f!({$op}, [
+                        image_rest[image_rest_index] = f!({$op}, [
                             (a, b1),
                             (a, b2),
                             (a, b3),
@@ -104,15 +104,15 @@ macro_rules! codomain_fn {
                             (a, b7),
                             (a, b8),
                         ]);
-                        codomain_rest_index += 1;
+                        image_rest_index += 1;
                     });
                 });
             }
 
             if a_tail_len > 0 && b_tail_len > 0 {
-                let codomain_filled_count: usize = (a_chunks_len * b_chunks_len * 64) + (a_chunks_len * b_tail_len * 8) + (b_chunks_len * a_tail_len * 8);
-                let codomain_rest = &mut codomain[codomain_filled_count..];
-                let mut codomain_rest_index: usize = 0;
+                let image_filled_count: usize = (a_chunks_len * b_chunks_len * 64) + (a_chunks_len * b_tail_len * 8) + (b_chunks_len * a_tail_len * 8);
+                let image_rest = &mut image[image_filled_count..];
+                let mut image_rest_index: usize = 0;
 
                 for_!(a_tail_index in 0..a_tail_len {
                     let a = a_tail[a_tail_index];
@@ -120,14 +120,14 @@ macro_rules! codomain_fn {
                     for_!(b_tail_index in 0..b_tail_len {
                         let b = b_tail[b_tail_index];
 
-                        codomain_rest[codomain_rest_index] = f!({$op}, a, b);
-                        codomain_rest_index += 1;
+                        image_rest[image_rest_index] = f!({$op}, a, b);
+                        image_rest_index += 1;
                     });
                 });
             }
 
-            codomain
+            image
         }
     };
 }
-pub(crate) use codomain_fn;
+pub(crate) use image_fn;

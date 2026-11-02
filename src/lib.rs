@@ -37,7 +37,7 @@ extern crate alloc;
 
 /// Defines the `Sure` type and its methods.
 mod base;
-pub(crate) mod codomain;
+pub(crate) mod image;
 mod const_helpers;
 pub(crate) mod for_macro;
 mod macros;

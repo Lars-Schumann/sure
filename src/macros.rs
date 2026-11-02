@@ -100,7 +100,7 @@ macro_rules! impl_simple_unary_ops {
             use crate::const_helpers::array_from_fn;
             use crate::set::LENGTH;
 
-            const CODOMAIN<const SET: Set<$inner_t>>: Set<$inner_t> = {
+            const IMAGE<const SET: Set<$inner_t>>: Set<$inner_t> = {
                 &array_from_fn!($inner_t, LENGTH::<$inner_t, SET>, const |i| {
                     let a: $inner_t = SET[i];
                     $op a
@@ -108,7 +108,7 @@ macro_rules! impl_simple_unary_ops {
             };
 
             const impl<const SET: Set<$inner_t>> $(::$op_trait)+ for Sure<$inner_t, SET> {
-                type Output = Sure<$inner_t, { CODOMAIN::<SET> }>;
+                type Output = Sure<$inner_t, { IMAGE::<SET> }>;
 
 
                 fn $trait_fn_name(self) -> Self::Output {
@@ -130,15 +130,15 @@ macro_rules! impl_simple_binary_ops {
         pub mod ${concat($inner_t,_,$trait_fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
-            use crate::codomain::codomain_fn;
+            use crate::image::image_fn;
             use crate::set::CARTESIAN_LENGTH;
 
-            codomain_fn!(a_t: $inner_t, b_t: $inner_t, codomain_t: $inner_t, op: {$op});
+            image_fn!(a_t: $inner_t, b_t: $inner_t, codomain_t: $inner_t, op: {$op});
 
-            const CODOMAIN<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = &codomain::<{ CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(A, B);
+            const IMAGE<const A: Set<$inner_t>, const B: Set<$inner_t>>: Set<$inner_t> = &image::<{ CARTESIAN_LENGTH::<$inner_t, $inner_t, A, B> }>(A, B);
 
             const impl<const A: Set<$inner_t>, const B: Set<$inner_t>> $(::$op_trait)+<Sure<$inner_t, B> > for Sure<$inner_t, A> {
-                type Output = Sure<$inner_t, { CODOMAIN::<A, B> }>;
+                type Output = Sure<$inner_t, { IMAGE::<A, B> }>;
 
                 fn $trait_fn_name(self, b: Sure<$inner_t, B>) -> Self::Output {
                     let a_inner: $inner_t = self.inner();
@@ -162,7 +162,7 @@ macro_rules! impl_unary_fns {
             use crate::const_helpers::array_from_fn;
             use crate::set::LENGTH;
 
-            const CODOMAIN<const SET: Set<$input_t>>: Set<$codomain_t> = {
+            const IMAGE<const SET: Set<$input_t>>: Set<$codomain_t> = {
                 &array_from_fn!($codomain_t, LENGTH::<$input_t, SET>, const |i| {
                     let a: $input_t = SET[i];
                     $fn_path(a)
@@ -172,7 +172,7 @@ macro_rules! impl_unary_fns {
             impl<const SET: Set<$input_t>> Sure<$input_t, SET> {
                 #[doc = crate::macros::$doc_macro_path!(fn_name: $fn_name, input_t: $input_t, codomain_t: $codomain_t)]
                 #[must_use]
-                pub const fn $fn_name(self) -> Sure<$codomain_t, { CODOMAIN::<SET> }> {
+                pub const fn $fn_name(self) -> Sure<$codomain_t, { IMAGE::<SET> }> {
                     let input_inner: $input_t = self.inner();
                     let output_inner: $codomain_t = $fn_path(input_inner);
                     // SAFETY: TODO
@@ -192,18 +192,18 @@ macro_rules! impl_std_binary_fns {
         pub mod ${concat($a_t,_,$b_t,_,$fn_name)} {
             use crate::base::Set;
             use crate::base::Sure;
-            use crate::codomain::codomain_fn;
+            use crate::image::image_fn;
             use crate::concat2;
             use crate::set::CARTESIAN_LENGTH;
 
-            codomain_fn!(a_t: $a_t, b_t: $b_t, codomain_t: $codomain_t, op: {$fn_path});
+            image_fn!(a_t: $a_t, b_t: $b_t, codomain_t: $codomain_t, op: {$fn_path});
 
-            pub const CODOMAIN<const A: Set<$a_t>, const B: Set<$b_t>>: Set<$codomain_t> = &codomain::<{ CARTESIAN_LENGTH::<$a_t, $b_t, A, B> }>(A, B);
+            pub const IMAGE<const A: Set<$a_t>, const B: Set<$b_t>>: Set<$codomain_t> = &image::<{ CARTESIAN_LENGTH::<$a_t, $b_t, A, B> }>(A, B);
 
             impl<const A: Set<$a_t>> Sure<$a_t, A> {
                 #[doc = concat2!("This method is the equivalent of [`"{$a_t}"::"{$fn_name}"`].")]
                 #[must_use]
-                pub const fn $fn_name<const B: Set<$b_t>>(self, b: Sure<$b_t, B>) -> Sure<$codomain_t, { CODOMAIN::<A, B> }> {
+                pub const fn $fn_name<const B: Set<$b_t>>(self, b: Sure<$b_t, B>) -> Sure<$codomain_t, { IMAGE::<A, B> }> {
                     let a_inner: $a_t = self.inner();
                     let b_inner: $b_t = b.inner();
                     let output_inner: $codomain_t = $fn_path(a_inner, b_inner);
