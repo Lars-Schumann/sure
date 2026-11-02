@@ -238,7 +238,7 @@ fn f1() {
 fn f2() {
     use sure::Sure;
     use sure::SureI32;
-    use sure::pure::AssertPure;
+    use sure::pure::AssumePure;
     use sure::pure::Pure;
 
     const fn add_twice(a: i32, b: i32) -> i32 {
@@ -250,7 +250,7 @@ fn f2() {
     let b: SureI32![4] = Sure::new(4).unwrap();
 
     let x: SureI32![9, 10] = add_twice_pure.call2(a, b);
-    let y: SureI32![9, 10] = unsafe { add_twice.assert_pure() }.call2(a, b);
+    let y: SureI32![9, 10] = unsafe { add_twice.assume_pure() }.call2(a, b);
 
     assert_eq!(x.inner(), 9);
     assert_eq!(y.inner(), 9);

@@ -61,15 +61,15 @@ impl<F: Copy + Send + Sync + 'static> Pure<F> {
 }
 
 /// Allows method syntax instead of [`Pure::new`]
-pub trait AssertPure: Sized {
+pub trait AssumePure: Sized {
     /// # Safety
     ///
     /// This inherits the safety requirements from [`Pure::new`].
-    unsafe fn assert_pure(self) -> Pure<Self>;
+    unsafe fn assume_pure(self) -> Pure<Self>;
 }
 
-impl<F: Copy + Send + Sync + 'static> AssertPure for F {
-    unsafe fn assert_pure(self) -> Pure<Self> {
+impl<F: Copy + Send + Sync + 'static> AssumePure for F {
+    unsafe fn assume_pure(self) -> Pure<Self> {
         // SAFETY: The safety requirements are passed to the caller.
         unsafe { Pure::new(self) }
     }
