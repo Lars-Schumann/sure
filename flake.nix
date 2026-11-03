@@ -49,11 +49,6 @@
               "-Zdump-mir=$filter" \
               -Zdump-mir-dir=target/mir
           }
-
-          # e.g. mircd u8_add dumps both CODOMAIN and its codomain helper to target/mir.
-          mircd() {
-            mir "''${1:?}::CODOMAIN|''${1:?}::codomain"
-          }
         '';
       };
     };
