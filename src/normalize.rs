@@ -23,14 +23,10 @@ macro_rules! normalize {
                 dense: bool,
             ) -> usize {
                 let v = a[first];
-                let mut diff = 0;
-                let mut len = 0;
-                let mut i = first;
+                let (mut diff, mut len, mut i) = (0, 0, first);
                 if dense {
-                    len = N;
-                    diff = v ^ a[N - 1];
                     let top = (1 as $ty) << (<$ty>::BITS - 1);
-                    i = 1;
+                    (len, diff, i) = (N, v ^ a[N - 1], 1);
                     while i < N && diff & top == 0 {
                         diff |= v ^ a[i];
                         i += 1;
@@ -50,21 +46,19 @@ macro_rules! normalize {
                 let shift = bits - digit;
                 let buckets = 1usize << digit;
                 let mask = buckets - 1;
-                let mut heads = [N; B];
                 let sign = ((<$ty>::MIN >> shift) as usize) & mask;
+                let mut heads = [N; B];
                 if shift == 0 {
                     if dense {
                         i = 0;
                         while i < N {
-                            let b = (a[i] as usize) & mask;
-                            heads[b] = i;
+                            heads[(a[i] as usize) & mask] = i;
                             i += 1;
                         }
                     } else {
                         i = first;
                         while i != N {
-                            let b = (a[i] as usize) & mask;
-                            heads[b] = i;
+                            heads[(a[i] as usize) & mask] = i;
                             i = next[i];
                         }
                     }
@@ -82,35 +76,34 @@ macro_rules! normalize {
                 if dense {
                     i = 0;
                     while i < N {
-                        let b = ((a[i] >> shift) as usize) & mask;
-                        next[i] = heads[b];
-                        heads[b] = i;
+                        let h = &mut heads[((a[i] >> shift) as usize) & mask];
+                        next[i] = *h;
+                        *h = i;
                         i += 1;
                     }
                 } else {
                     i = first;
                     while i != N {
+                        let h = &mut heads[((a[i] >> shift) as usize) & mask];
                         let following = next[i];
-                        let b = ((a[i] >> shift) as usize) & mask;
-                        next[i] = heads[b];
-                        heads[b] = i;
+                        next[i] = *h;
+                        *h = i;
                         i = following;
                     }
                 }
                 let mut b = 0;
                 while b < buckets {
                     i = heads[b ^ sign];
-                    let first = i;
+                    b += 1;
                     if i == N {
-                        b += 1;
                         continue;
                     }
+                    let head = i;
                     let mut lo = a[i];
                     let second = next[i];
                     if second == N {
                         out[dest] = lo;
                         dest += 1;
-                        b += 1;
                         continue;
                     }
                     let mut hi = a[second];
@@ -119,32 +112,32 @@ macro_rules! normalize {
                     }
                     let start = dest;
                     i = next[second];
-                    if i != N {
-                        let mut mid = a[i];
-                        if mid < lo {
-                            (lo, mid) = (mid, lo);
-                        } else if mid > hi {
-                            (hi, mid) = (mid, hi);
-                        }
-                        out[dest] = lo;
-                        dest += 1;
-                        if mid != lo {
-                            out[dest] = mid;
-                            dest += 1;
-                        }
-                        if hi != mid {
-                            out[dest] = hi;
-                            dest += 1;
-                        }
-                        i = next[i];
-                    } else {
+                    if i == N {
                         out[dest] = lo;
                         dest += 1;
                         if hi != lo {
                             out[dest] = hi;
                             dest += 1;
                         }
+                        continue;
                     }
+                    let mut mid = a[i];
+                    if mid < lo {
+                        (lo, mid) = (mid, lo);
+                    } else if mid > hi {
+                        (hi, mid) = (mid, hi);
+                    }
+                    out[dest] = lo;
+                    dest += 1;
+                    if mid != lo {
+                        out[dest] = mid;
+                        dest += 1;
+                    }
+                    if hi != mid {
+                        out[dest] = hi;
+                        dest += 1;
+                    }
+                    i = next[i];
                     if lo == hi {
                         while i != N && a[i] == lo {
                             i = next[i];
@@ -158,7 +151,7 @@ macro_rules! normalize {
                         }
                         if j == dest || out[j] != v {
                             if dest - start == 8 {
-                                dest = sort::<N, 4096>(a, next, first, out, start, false);
+                                dest = sort::<N, 4096>(a, next, head, out, start, false);
                                 break;
                             }
                             let mut k = dest;
@@ -171,17 +164,14 @@ macro_rules! normalize {
                         }
                         i = next[i];
                     }
-                    b += 1;
                 }
                 dest
             }
             let mut out = a;
-            let mut len = 0;
-            let mut i = 0;
+            let (mut len, mut i) = (0, 0);
             if N != 0 {
                 let mut previous = a[0];
-                len = 1;
-                i = 1;
+                (len, i) = (1, 1);
                 while i < N {
                     let v = a[i];
                     if v < previous {
