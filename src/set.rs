@@ -136,69 +136,44 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
 }
 
 macro_rules! define_normalize_narrow {
-    ($uns_t:ty, $snd_t:ty, $uns_fn:ident, $snd_fn:ident) => {
-        #[allow(clippy::large_stack_arrays)]
-        const fn $uns_fn<const LEN: usize>(arr: [$uns_t; LEN]) -> Vec<$uns_t> {
+    ($name:ident, $t:ty, $uns_t:ty, [$($slots:expr),+]) => {
+        #[allow(clippy::large_stack_arrays, clippy::cast_sign_loss, clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
+        const fn $name<const LEN: usize>(arr: [$t; LEN]) -> Vec<$t> {
             const ELEMENT_COUNT: usize = (<$uns_t>::MAX as usize) + 1;
 
             let mut element_bitset: [bool; ELEMENT_COUNT] = [false; ELEMENT_COUNT];
 
             let mut i: usize = 0;
             while i < LEN {
-                element_bitset[arr[i] as usize] = true;
+                element_bitset[arr[i] as $uns_t as usize] = true;
                 i += 1;
             }
 
-            let mut normalized: Vec<$uns_t> = Vec::with_capacity(ELEMENT_COUNT);
+            let mut normalized: Vec<$t> = Vec::with_capacity(ELEMENT_COUNT);
 
-            let mut i: $uns_t = 0;
             let mut next_write_offset: usize = 0;
-            let normalized_start: *mut $uns_t = normalized.as_mut_ptr();
-            loop {
-                if element_bitset[i as usize] {
-                    // SAFETY: TODO
-                    unsafe { *normalized_start.add(next_write_offset) = i };
-                    next_write_offset += 1;
+            let normalized_start: *mut $t = normalized.as_mut_ptr();
+            $(
+                let core::ops::Range { start, end } = $slots;
+                let mut slot: usize = start;
+                while slot < end {
+                    if element_bitset[slot] {
+                        // SAFETY: TODO
+                        unsafe { *normalized_start.add(next_write_offset) = slot as $t };
+                        next_write_offset += 1;
+                    }
+                    slot += 1;
                 }
-
-                if i == <$uns_t>::MAX {
-                    break;
-                }
-                i += 1;
-            }
+            )+
 
             // SAFETY: TODO
             unsafe { normalized.set_len(next_write_offset) }
             normalized
         }
-
-        #[allow(clippy::similar_names, clippy::undocumented_unsafe_blocks)]
-        const fn $snd_fn<const LEN: usize>(mut arr: [$snd_t; LEN]) -> Vec<$snd_t> {
-            // flip sign bit so it sorts the same way as the unsigned type
-            let mut i: usize = 0;
-            while i < LEN {
-                arr[i] ^= <$snd_t>::MIN;
-                i += 1;
-            }
-
-            let arr_uns: [$uns_t; LEN] = unsafe { core::intrinsics::transmute_unchecked(arr) };
-            let vec_uns: Vec<$uns_t> = $uns_fn(arr_uns);
-            // SAFETY: obviously unsound but urgh
-            let mut vec_snd: Vec<$snd_t> = unsafe { core::mem::transmute(vec_uns) };
-
-            // unflip sign bit
-            let vec_len = vec_snd.len();
-            let slice = vec_snd.as_mut_slice();
-            let mut i: usize = 0;
-            while i < vec_len {
-                slice[i] ^= <$snd_t>::MIN;
-                i += 1;
-            }
-
-            vec_snd
-        }
     };
 }
 
-define_normalize_narrow!(u8, i8, normalize_u8, normalize_i8);
-define_normalize_narrow!(u16, i16, normalize_u16, normalize_i16);
+define_normalize_narrow!(normalize_u8, u8, u8, [0..256]);
+define_normalize_narrow!(normalize_u16, u16, u16, [0..65536]);
+define_normalize_narrow!(normalize_i8, i8, u8, [128..256, 0..128]);
+define_normalize_narrow!(normalize_i16, i16, u16, [32768..65536, 0..32768]);
