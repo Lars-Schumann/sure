@@ -3,16 +3,14 @@ use alloc::vec::Vec;
 const BUCKETS<const N: usize>: usize = const { 1 << N.bit_width() };
 
 macro_rules! each {
-    ($slice:expr, $cond:expr $(; $i:ident)?, $($body:tt)+) => {{
-        let mut s: &[_] = $slice;
+    ($slice:expr $(, $cond:expr)? $(; $i:ident)? => $($body:tt)+) => {{
+        let mut s = $slice;
         macro_rules! body { $($body)+ }
-        each!(@ s, $cond, 16 $($i)?, v0 0, v1 1, v2 2, v3 3, v4 4, v5 5, v6 6, v7 7, v8 8, v9 9, v10 10, v11 11, v12 12, v13 13, v14 14, v15 15);
-        each!(@ s, $cond, 1 $($i)?, v0 0);
+        each!(@ s, 16 $($i)? $(, $cond)? => v0 0, v1 1, v2 2, v3 3, v4 4, v5 5, v6 6, v7 7, v8 8, v9 9, v10 10, v11 11, v12 12, v13 13, v14 14, v15 15);
+        each!(@ s, 1 $($i)? $(, $cond)? => v0 0);
     }};
-    (@ $s:ident, $cond:expr, $n:literal $($i:ident)?, $($v:ident $k:literal),+) => {
-        while let &[$($v,)+ ref rest @ ..] = $s
-            && $cond
-        {
+    (@ $s:ident, $n:literal $($i:ident)? $(, $cond:expr)? => $($v:ident $k:literal),+) => {
+        while let &[$($v,)+ ref rest @ ..] = $s $(&& $cond)? {
             $s = rest;
             $(body!($v, $k);)+
             $($i += $n;)?
@@ -31,7 +29,7 @@ macro_rules! normalize {
             ) -> usize {
                 let first = a[0];
                 let mut diff = 0;
-                each!(a, diff & const { 1 << (<$ty>::BITS - 1) } == 0, ($v:expr, $k:expr) => {
+                each!(a, diff & const { 1 << (<$ty>::BITS - 1) } == 0 => ($v:expr, $k:expr) => {
                     diff |= $v ^ first;
                 });
                 let bits = (diff as $uty).bit_width();
@@ -43,11 +41,11 @@ macro_rules! normalize {
                 let mut bucket = [first; B];
                 let mut i = 0;
                 if shift == 0 {
-                    each!(a, true; i, ($v:expr, $k:expr) => {
+                    each!(a; i => ($v:expr, $k:expr) => {
                         heads[($v ^ key) as $uty as usize] = i | $k;
                     });
                 } else {
-                    each!(a, true; i, ($v:expr, $k:expr) => {
+                    each!(a; i => ($v:expr, $k:expr) => {
                         let h = &mut heads[(($v ^ key) as $uty >> shift) as usize];
                         next[i | $k] = *h;
                         *h = i | $k;
@@ -55,7 +53,7 @@ macro_rules! normalize {
                 }
                 // SAFETY: yes.
                 let used = unsafe { core::slice::from_raw_parts(heads.as_ptr(), 1 << (bits - shift)) };
-                each!(used, true, ($h:expr, $k:expr) => {
+                each!(used => ($h:expr, $k:expr) => {
                     if let usize::MAX = $h {} else {
                         let start = dest;
                         let mut last = a[$h];
@@ -97,14 +95,16 @@ macro_rules! normalize {
                                     }
                                 }
                                 let mut j = start;
-                                while j != dest {
+                                loop {
                                     let o = out[j];
-                                    if v <= o {
-                                        if v == o {
-                                            continue 'list;
-                                        }
+                                    if v < o {
                                         out[j] = v;
                                         v = o;
+                                        if v == last {
+                                            break;
+                                        }
+                                    } else if v == o {
+                                        continue 'list;
                                     }
                                     j += 1;
                                 }
@@ -124,9 +124,9 @@ macro_rules! normalize {
             let mut out = a;
             let mut len = 1;
             let mut sorted = true;
-            each!(tail, sorted, ($v:expr, $k:expr) => {
-                sorted &= last <= $v;
+            each!(tail, sorted => ($v:expr, $k:expr) => {
                 if last != $v {
+                    sorted &= last < $v;
                     out[len] = $v;
                     len += 1;
                     last = $v;
