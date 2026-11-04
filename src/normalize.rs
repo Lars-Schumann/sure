@@ -3,17 +3,18 @@ use alloc::vec::Vec;
 const BUCKETS<const N: usize>: usize = const { 1 << N.bit_width() };
 
 macro_rules! each {
-    ($slice:expr, $cond:expr, $body:ident $(, $i:ident)?) => {
+    ($slice:expr, $cond:expr $(; $i:ident)?, $($body:tt)+) => {{
         let mut s: &[_] = $slice;
-        each!(@ s, $cond, $body, 8 $($i)?, v0 0, v1 1, v2 2, v3 3, v4 4, v5 5, v6 6, v7 7);
-        each!(@ s, $cond, $body, 1 $($i)?, v0 0);
-    };
-    (@ $s:ident, $cond:expr, $body:ident, $n:literal $($i:ident)?, $($v:ident $k:literal),+) => {
+        macro_rules! body { $($body)+ }
+        each!(@ s, $cond, 16 $($i)?, v0 0, v1 1, v2 2, v3 3, v4 4, v5 5, v6 6, v7 7, v8 8, v9 9, v10 10, v11 11, v12 12, v13 13, v14 14, v15 15);
+        each!(@ s, $cond, 1 $($i)?, v0 0);
+    }};
+    (@ $s:ident, $cond:expr, $n:literal $($i:ident)?, $($v:ident $k:literal),+) => {
         while let &[$($v,)+ ref rest @ ..] = $s
             && $cond
         {
             $s = rest;
-            $($body!($v, $k);)+
+            $(body!($v, $k);)+
             $($i += $n;)?
         }
     };
@@ -21,12 +22,7 @@ macro_rules! each {
 
 macro_rules! normalize {
     ($name:ident, $ty:ty, $uty:ty) => {
-        #[allow(
-            clippy::cast_possible_truncation,
-            clippy::cast_sign_loss,
-            clippy::manual_bit_width,
-            clippy::too_many_lines
-        )]
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss, clippy::too_many_lines)]
         pub(crate) const fn $name<const N: usize>(a: [$ty; N]) -> Vec<$ty> {
             const fn sort<const N: usize, const B: usize>(
                 a: &[$ty],
@@ -35,102 +31,108 @@ macro_rules! normalize {
             ) -> usize {
                 let first = a[0];
                 let mut diff = 0;
-                macro_rules! mix {
-                    ($v:expr, $k:expr) => {
-                        diff |= $v ^ first;
-                    };
-                }
-                each!(a, diff & const { 1 << (<$ty>::BITS - 1) } == 0, mix);
+                each!(a, diff & const { 1 << (<$ty>::BITS - 1) } == 0, ($v:expr, $k:expr) => {
+                    diff |= $v ^ first;
+                });
+                let bits = (diff as $uty).bit_width();
+                let shift = bits.saturating_sub(a.len().bit_width());
+                let key = <$ty>::MIN ^ ((first ^ <$ty>::MIN) & (!0 << (bits - 1) << 1));
 
-                let bits = <$ty>::BITS - diff.leading_zeros();
-                let width = bits.min(a.len().bit_width()).min(const { B.ilog2() });
-                let shift = bits - width;
-                let key = <$ty>::MIN ^ ((first ^ <$ty>::MIN) >> (bits - 1) >> 1 << (bits - 1) << 1);
-
-                let mut heads = [N; B];
-                let mut next = [N; N];
+                let mut heads = [usize::MAX; B];
+                let mut next = [usize::MAX; B];
+                let mut bucket = [first; B];
                 let mut i = 0;
-                macro_rules! push {
-                    ($v:expr, $k:expr) => {
+                if shift == 0 {
+                    each!(a, true; i, ($v:expr, $k:expr) => {
+                        heads[($v ^ key) as $uty as usize] = i | $k;
+                    });
+                } else {
+                    each!(a, true; i, ($v:expr, $k:expr) => {
                         let h = &mut heads[(($v ^ key) as $uty >> shift) as usize];
-                        if *h != N && shift != 0 {
-                            next[i | $k] = *h;
-                        }
+                        next[i | $k] = *h;
                         *h = i | $k;
-                    };
+                    });
                 }
-                each!(a, true, push, i);
-
-                macro_rules! bucket {
-                    ($h:expr, $k:expr) => {
-                        if $h != N {
-                            let start = dest;
-                            let mut last = a[$h];
-                            out[dest] = last;
-                            dest += 1;
-                            i = next[$h];
-                            'list: while i != N {
-                                let mut v = a[i];
-                                i = next[i];
-                                if v <= last {
-                                    if v == last {
-                                        continue;
+                // SAFETY: yes.
+                let used = unsafe { core::slice::from_raw_parts(heads.as_ptr(), 1 << (bits - shift)) };
+                each!(used, true, ($h:expr, $k:expr) => {
+                    if let usize::MAX = $h {} else {
+                        let start = dest;
+                        let mut last = a[$h];
+                        out[dest] = last;
+                        dest += 1;
+                        let mut i = next[$h];
+                        'list: loop {
+                            if let usize::MAX = i {
+                                break;
+                            }
+                            let mut v = a[i];
+                            i = next[i];
+                            if v == last {
+                                continue;
+                            }
+                            if v < last {
+                                if dest - start >= 6 {
+                                    let mut n = i;
+                                    let mut k = 0;
+                                    while k != 10 && n != usize::MAX {
+                                        n = next[n];
+                                        k += 1;
                                     }
-                                    if dest - start >= 16 {
-                                        let mut bucket = *out;
+                                    if n != usize::MAX || dest - start >= 32 {
                                         let mut len = 0;
                                         i = $h;
-                                        while i != N {
+                                        while i != usize::MAX {
                                             bucket[len] = a[i];
                                             len += 1;
                                             i = next[i];
                                         }
-                                        dest = sort::<N, 4096>(bucket.split_at(len).0, out, start);
+                                        // SAFETY: yes.
+                                        let b = unsafe { core::slice::from_raw_parts(bucket.as_ptr(), len) };
+                                        dest = match len {
+                                            ..1024 => sort::<N, 1024>(b, out, start),
+                                            _ => sort::<N, B>(b, out, start),
+                                        };
                                         break;
                                     }
-                                    let mut j = start;
-                                    while j != dest {
-                                        let o = out[j];
-                                        if v <= o {
-                                            if v == o {
-                                                continue 'list;
-                                            }
-                                            out[j] = v;
-                                            v = o;
-                                        }
-                                        j += 1;
-                                    }
                                 }
-                                out[dest] = v;
-                                last = v;
-                                dest += 1;
+                                let mut j = start;
+                                while j != dest {
+                                    let o = out[j];
+                                    if v <= o {
+                                        if v == o {
+                                            continue 'list;
+                                        }
+                                        out[j] = v;
+                                        v = o;
+                                    }
+                                    j += 1;
+                                }
                             }
+                            out[dest] = v;
+                            last = v;
+                            dest += 1;
                         }
-                    };
-                }
-                // SAFETY: yes.
-                let used = unsafe { core::slice::from_raw_parts(heads.as_ptr(), 1 << width) };
-                each!(used, true, bucket);
+                    }
+                });
                 dest
             }
 
-            let mut out = a;
             let &[mut last, ref tail @ ..] = a.as_slice() else {
                 return Vec::new();
             };
-            let mut s = tail;
+            let mut out = a;
             let mut len = 1;
-            while let &[v, ref rest @ ..] = s
-                && v >= last
-            {
-                s = rest;
-                if v != last {
-                    out[len] = v;
+            let mut sorted = true;
+            each!(tail, sorted, ($v:expr, $k:expr) => {
+                sorted &= last <= $v;
+                if last != $v {
+                    out[len] = $v;
                     len += 1;
-                    last = v;
+                    last = $v;
                 }
-            }
-            if !s.is_empty() {
+            });
+            if !sorted {
                 len = sort::<N, { BUCKETS::<N> }>(&a, &mut out, 0);
             }
             let mut result: Vec<$ty> = Vec::with_capacity(len);
