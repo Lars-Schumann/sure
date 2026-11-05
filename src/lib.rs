@@ -18,6 +18,7 @@
 #![feature(generic_const_parameter_types)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(maybe_uninit_array_assume_init)]
+#![feature(stmt_expr_attributes)]
 #![feature(unsized_const_params)]
 //
 #![deny(missing_docs)]
@@ -36,9 +37,9 @@ extern crate alloc;
 
 /// Defines the `Sure` type and its methods.
 mod base;
-pub(crate) mod image;
 mod const_helpers;
 pub(crate) mod for_macro;
+pub(crate) mod image;
 mod macros;
 mod normalize;
 /// TODO(doc)

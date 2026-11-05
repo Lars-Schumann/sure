@@ -136,7 +136,7 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
 }
 
 macro_rules! define_normalize_narrow {
-    ($name:ident, $t:ty, $uns_t:ty, [$($slots:expr),+]) => {
+    ($name:ident, $t:ty, $uns_t:ty, $flip:expr) => {
         #[allow(clippy::large_stack_arrays, clippy::cast_sign_loss, clippy::cast_possible_truncation, clippy::cast_possible_wrap, clippy::too_many_lines)]
         const fn $name<const LEN: usize>(arr: [$t; LEN]) -> Vec<$t> {
             const ELEMENT_COUNT: usize = (<$uns_t>::MAX as usize) + 1;
@@ -239,18 +239,91 @@ macro_rules! define_normalize_narrow {
 
             let mut next_write_offset: usize = 0;
             let normalized_start: *mut $t = normalized.as_mut_ptr();
-            $(
-                let core::ops::Range { start, end } = $slots;
-                let mut slot: usize = start;
-                while slot < end {
-                    if element_bitset[slot] {
-                        // SAFETY: TODO
-                        unsafe { *normalized_start.add(next_write_offset) = slot as $t };
-                        next_write_offset += 1;
-                    }
-                    slot += 1;
+            // SAFETY: Arrays are guaranteed to be contiguous.
+            let bitset_chunks: [[bool; 64]; ELEMENT_COUNT / 64] = unsafe { core::mem::transmute(element_bitset) };
+            let mut chunk_start: usize = 0;
+            while chunk_start < ELEMENT_COUNT {
+                let slot: usize = chunk_start ^ $flip;
+                let [
+                    b01, b02, b03, b04, b05, b06, b07, b08,
+                    b09, b10, b11, b12, b13, b14, b15, b16,
+                    b17, b18, b19, b20, b21, b22, b23, b24,
+                    b25, b26, b27, b28, b29, b30, b31, b32,
+                    b33, b34, b35, b36, b37, b38, b39, b40,
+                    b41, b42, b43, b44, b45, b46, b47, b48,
+                    b49, b50, b51, b52, b53, b54, b55, b56,
+                    b57, b58, b59, b60, b61, b62, b63, b64,
+                ] = bitset_chunks[slot / 64];
+                // SAFETY: TODO
+                #[rustfmt::skip]
+                unsafe {
+                    if b01 { *normalized_start.add(next_write_offset) =  slot       as $t; next_write_offset += 1; }
+                    if b02 { *normalized_start.add(next_write_offset) = (slot |  1) as $t; next_write_offset += 1; }
+                    if b03 { *normalized_start.add(next_write_offset) = (slot |  2) as $t; next_write_offset += 1; }
+                    if b04 { *normalized_start.add(next_write_offset) = (slot |  3) as $t; next_write_offset += 1; }
+                    if b05 { *normalized_start.add(next_write_offset) = (slot |  4) as $t; next_write_offset += 1; }
+                    if b06 { *normalized_start.add(next_write_offset) = (slot |  5) as $t; next_write_offset += 1; }
+                    if b07 { *normalized_start.add(next_write_offset) = (slot |  6) as $t; next_write_offset += 1; }
+                    if b08 { *normalized_start.add(next_write_offset) = (slot |  7) as $t; next_write_offset += 1; }
+                    if b09 { *normalized_start.add(next_write_offset) = (slot |  8) as $t; next_write_offset += 1; }
+                    if b10 { *normalized_start.add(next_write_offset) = (slot |  9) as $t; next_write_offset += 1; }
+                    if b11 { *normalized_start.add(next_write_offset) = (slot | 10) as $t; next_write_offset += 1; }
+                    if b12 { *normalized_start.add(next_write_offset) = (slot | 11) as $t; next_write_offset += 1; }
+                    if b13 { *normalized_start.add(next_write_offset) = (slot | 12) as $t; next_write_offset += 1; }
+                    if b14 { *normalized_start.add(next_write_offset) = (slot | 13) as $t; next_write_offset += 1; }
+                    if b15 { *normalized_start.add(next_write_offset) = (slot | 14) as $t; next_write_offset += 1; }
+                    if b16 { *normalized_start.add(next_write_offset) = (slot | 15) as $t; next_write_offset += 1; }
+                    if b17 { *normalized_start.add(next_write_offset) = (slot | 16) as $t; next_write_offset += 1; }
+                    if b18 { *normalized_start.add(next_write_offset) = (slot | 17) as $t; next_write_offset += 1; }
+                    if b19 { *normalized_start.add(next_write_offset) = (slot | 18) as $t; next_write_offset += 1; }
+                    if b20 { *normalized_start.add(next_write_offset) = (slot | 19) as $t; next_write_offset += 1; }
+                    if b21 { *normalized_start.add(next_write_offset) = (slot | 20) as $t; next_write_offset += 1; }
+                    if b22 { *normalized_start.add(next_write_offset) = (slot | 21) as $t; next_write_offset += 1; }
+                    if b23 { *normalized_start.add(next_write_offset) = (slot | 22) as $t; next_write_offset += 1; }
+                    if b24 { *normalized_start.add(next_write_offset) = (slot | 23) as $t; next_write_offset += 1; }
+                    if b25 { *normalized_start.add(next_write_offset) = (slot | 24) as $t; next_write_offset += 1; }
+                    if b26 { *normalized_start.add(next_write_offset) = (slot | 25) as $t; next_write_offset += 1; }
+                    if b27 { *normalized_start.add(next_write_offset) = (slot | 26) as $t; next_write_offset += 1; }
+                    if b28 { *normalized_start.add(next_write_offset) = (slot | 27) as $t; next_write_offset += 1; }
+                    if b29 { *normalized_start.add(next_write_offset) = (slot | 28) as $t; next_write_offset += 1; }
+                    if b30 { *normalized_start.add(next_write_offset) = (slot | 29) as $t; next_write_offset += 1; }
+                    if b31 { *normalized_start.add(next_write_offset) = (slot | 30) as $t; next_write_offset += 1; }
+                    if b32 { *normalized_start.add(next_write_offset) = (slot | 31) as $t; next_write_offset += 1; }
+                    if b33 { *normalized_start.add(next_write_offset) = (slot | 32) as $t; next_write_offset += 1; }
+                    if b34 { *normalized_start.add(next_write_offset) = (slot | 33) as $t; next_write_offset += 1; }
+                    if b35 { *normalized_start.add(next_write_offset) = (slot | 34) as $t; next_write_offset += 1; }
+                    if b36 { *normalized_start.add(next_write_offset) = (slot | 35) as $t; next_write_offset += 1; }
+                    if b37 { *normalized_start.add(next_write_offset) = (slot | 36) as $t; next_write_offset += 1; }
+                    if b38 { *normalized_start.add(next_write_offset) = (slot | 37) as $t; next_write_offset += 1; }
+                    if b39 { *normalized_start.add(next_write_offset) = (slot | 38) as $t; next_write_offset += 1; }
+                    if b40 { *normalized_start.add(next_write_offset) = (slot | 39) as $t; next_write_offset += 1; }
+                    if b41 { *normalized_start.add(next_write_offset) = (slot | 40) as $t; next_write_offset += 1; }
+                    if b42 { *normalized_start.add(next_write_offset) = (slot | 41) as $t; next_write_offset += 1; }
+                    if b43 { *normalized_start.add(next_write_offset) = (slot | 42) as $t; next_write_offset += 1; }
+                    if b44 { *normalized_start.add(next_write_offset) = (slot | 43) as $t; next_write_offset += 1; }
+                    if b45 { *normalized_start.add(next_write_offset) = (slot | 44) as $t; next_write_offset += 1; }
+                    if b46 { *normalized_start.add(next_write_offset) = (slot | 45) as $t; next_write_offset += 1; }
+                    if b47 { *normalized_start.add(next_write_offset) = (slot | 46) as $t; next_write_offset += 1; }
+                    if b48 { *normalized_start.add(next_write_offset) = (slot | 47) as $t; next_write_offset += 1; }
+                    if b49 { *normalized_start.add(next_write_offset) = (slot | 48) as $t; next_write_offset += 1; }
+                    if b50 { *normalized_start.add(next_write_offset) = (slot | 49) as $t; next_write_offset += 1; }
+                    if b51 { *normalized_start.add(next_write_offset) = (slot | 50) as $t; next_write_offset += 1; }
+                    if b52 { *normalized_start.add(next_write_offset) = (slot | 51) as $t; next_write_offset += 1; }
+                    if b53 { *normalized_start.add(next_write_offset) = (slot | 52) as $t; next_write_offset += 1; }
+                    if b54 { *normalized_start.add(next_write_offset) = (slot | 53) as $t; next_write_offset += 1; }
+                    if b55 { *normalized_start.add(next_write_offset) = (slot | 54) as $t; next_write_offset += 1; }
+                    if b56 { *normalized_start.add(next_write_offset) = (slot | 55) as $t; next_write_offset += 1; }
+                    if b57 { *normalized_start.add(next_write_offset) = (slot | 56) as $t; next_write_offset += 1; }
+                    if b58 { *normalized_start.add(next_write_offset) = (slot | 57) as $t; next_write_offset += 1; }
+                    if b59 { *normalized_start.add(next_write_offset) = (slot | 58) as $t; next_write_offset += 1; }
+                    if b60 { *normalized_start.add(next_write_offset) = (slot | 59) as $t; next_write_offset += 1; }
+                    if b61 { *normalized_start.add(next_write_offset) = (slot | 60) as $t; next_write_offset += 1; }
+                    if b62 { *normalized_start.add(next_write_offset) = (slot | 61) as $t; next_write_offset += 1; }
+                    if b63 { *normalized_start.add(next_write_offset) = (slot | 62) as $t; next_write_offset += 1; }
+                    if b64 { *normalized_start.add(next_write_offset) = (slot | 63) as $t; next_write_offset += 1; }
                 }
-            )+
+                chunk_start += 64;
+            }
 
             // SAFETY: TODO
             unsafe { normalized.set_len(next_write_offset) }
@@ -259,7 +332,7 @@ macro_rules! define_normalize_narrow {
     };
 }
 
-define_normalize_narrow!(normalize_u8, u8, u8, [0..256]);
-define_normalize_narrow!(normalize_u16, u16, u16, [0..65536]);
-define_normalize_narrow!(normalize_i8, i8, u8, [128..256, 0..128]);
-define_normalize_narrow!(normalize_i16, i16, u16, [32768..65536, 0..32768]);
+define_normalize_narrow!(normalize_u8, u8, u8, 0);
+define_normalize_narrow!(normalize_u16, u16, u16, 0);
+define_normalize_narrow!(normalize_i8, i8, u8, 128);
+define_normalize_narrow!(normalize_i16, i16, u16, 32768);
