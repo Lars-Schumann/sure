@@ -137,16 +137,102 @@ pub const fn normalize<T: SureEq + [const] Ord + Copy + [const] Destruct, const 
 
 macro_rules! define_normalize_narrow {
     ($name:ident, $t:ty, $uns_t:ty, [$($slots:expr),+]) => {
-        #[allow(clippy::large_stack_arrays, clippy::cast_sign_loss, clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
+        #[allow(clippy::large_stack_arrays, clippy::cast_sign_loss, clippy::cast_possible_truncation, clippy::cast_possible_wrap, clippy::too_many_lines)]
         const fn $name<const LEN: usize>(arr: [$t; LEN]) -> Vec<$t> {
             const ELEMENT_COUNT: usize = (<$uns_t>::MAX as usize) + 1;
 
             let mut element_bitset: [bool; ELEMENT_COUNT] = [false; ELEMENT_COUNT];
 
-            let mut i: usize = 0;
-            while i < LEN {
-                element_bitset[arr[i] as $uns_t as usize] = true;
-                i += 1;
+            let (arr_chunks, arr_tail) = arr.as_chunks::<64>();
+            let (arr_chunks_len, arr_tail_len) = (arr_chunks.len(), arr_tail.len());
+
+            let mut arr_chunks_index: usize = 0;
+
+            while arr_chunks_index < arr_chunks_len {
+                let arr_chunk = arr_chunks[arr_chunks_index];
+                arr_chunks_index += 1;
+                let [
+                    a01, a02, a03, a04, a05, a06, a07, a08,
+                    a09, a10, a11, a12, a13, a14, a15, a16,
+                    a17, a18, a19, a20, a21, a22, a23, a24,
+                    a25, a26, a27, a28, a29, a30, a31, a32,
+                    a33, a34, a35, a36, a37, a38, a39, a40,
+                    a41, a42, a43, a44, a45, a46, a47, a48,
+                    a49, a50, a51, a52, a53, a54, a55, a56,
+                    a57, a58, a59, a60, a61, a62, a63, a64,
+                ] = arr_chunk;
+                element_bitset[a01 as $uns_t as usize] = true;
+                element_bitset[a02 as $uns_t as usize] = true;
+                element_bitset[a03 as $uns_t as usize] = true;
+                element_bitset[a04 as $uns_t as usize] = true;
+                element_bitset[a05 as $uns_t as usize] = true;
+                element_bitset[a06 as $uns_t as usize] = true;
+                element_bitset[a07 as $uns_t as usize] = true;
+                element_bitset[a08 as $uns_t as usize] = true;
+                element_bitset[a09 as $uns_t as usize] = true;
+                element_bitset[a10 as $uns_t as usize] = true;
+                element_bitset[a11 as $uns_t as usize] = true;
+                element_bitset[a12 as $uns_t as usize] = true;
+                element_bitset[a13 as $uns_t as usize] = true;
+                element_bitset[a14 as $uns_t as usize] = true;
+                element_bitset[a15 as $uns_t as usize] = true;
+                element_bitset[a16 as $uns_t as usize] = true;
+                element_bitset[a17 as $uns_t as usize] = true;
+                element_bitset[a18 as $uns_t as usize] = true;
+                element_bitset[a19 as $uns_t as usize] = true;
+                element_bitset[a20 as $uns_t as usize] = true;
+                element_bitset[a21 as $uns_t as usize] = true;
+                element_bitset[a22 as $uns_t as usize] = true;
+                element_bitset[a23 as $uns_t as usize] = true;
+                element_bitset[a24 as $uns_t as usize] = true;
+                element_bitset[a25 as $uns_t as usize] = true;
+                element_bitset[a26 as $uns_t as usize] = true;
+                element_bitset[a27 as $uns_t as usize] = true;
+                element_bitset[a28 as $uns_t as usize] = true;
+                element_bitset[a29 as $uns_t as usize] = true;
+                element_bitset[a30 as $uns_t as usize] = true;
+                element_bitset[a31 as $uns_t as usize] = true;
+                element_bitset[a32 as $uns_t as usize] = true;
+                element_bitset[a33 as $uns_t as usize] = true;
+                element_bitset[a34 as $uns_t as usize] = true;
+                element_bitset[a35 as $uns_t as usize] = true;
+                element_bitset[a36 as $uns_t as usize] = true;
+                element_bitset[a37 as $uns_t as usize] = true;
+                element_bitset[a38 as $uns_t as usize] = true;
+                element_bitset[a39 as $uns_t as usize] = true;
+                element_bitset[a40 as $uns_t as usize] = true;
+                element_bitset[a41 as $uns_t as usize] = true;
+                element_bitset[a42 as $uns_t as usize] = true;
+                element_bitset[a43 as $uns_t as usize] = true;
+                element_bitset[a44 as $uns_t as usize] = true;
+                element_bitset[a45 as $uns_t as usize] = true;
+                element_bitset[a46 as $uns_t as usize] = true;
+                element_bitset[a47 as $uns_t as usize] = true;
+                element_bitset[a48 as $uns_t as usize] = true;
+                element_bitset[a49 as $uns_t as usize] = true;
+                element_bitset[a50 as $uns_t as usize] = true;
+                element_bitset[a51 as $uns_t as usize] = true;
+                element_bitset[a52 as $uns_t as usize] = true;
+                element_bitset[a53 as $uns_t as usize] = true;
+                element_bitset[a54 as $uns_t as usize] = true;
+                element_bitset[a55 as $uns_t as usize] = true;
+                element_bitset[a56 as $uns_t as usize] = true;
+                element_bitset[a57 as $uns_t as usize] = true;
+                element_bitset[a58 as $uns_t as usize] = true;
+                element_bitset[a59 as $uns_t as usize] = true;
+                element_bitset[a60 as $uns_t as usize] = true;
+                element_bitset[a61 as $uns_t as usize] = true;
+                element_bitset[a62 as $uns_t as usize] = true;
+                element_bitset[a63 as $uns_t as usize] = true;
+                element_bitset[a64 as $uns_t as usize] = true;
+            }
+
+
+            let mut arr_tail_index: usize = 0;
+
+            while arr_tail_index < arr_tail_len {
+                element_bitset[arr_tail[arr_tail_index] as $uns_t as usize] = true;
+                arr_tail_index += 1;
             }
 
             let mut normalized: Vec<$t> = Vec::with_capacity(ELEMENT_COUNT);
